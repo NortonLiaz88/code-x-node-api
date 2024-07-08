@@ -1,5 +1,5 @@
-import { Destination, Interest, Knowledge, Language } from 'src/domain/enums';
-import { User } from 'src/domain/models/user';
+import { Destination, Interest, Knowledge, Language } from '@prisma/client';
+import { UserModel } from 'src/domain/models/user';
 
 export interface UserCreationProfile {
   knowledge: Knowledge;
@@ -21,5 +21,5 @@ export interface AddUserModel {
 }
 
 export interface AddUser {
-  add: (user: AddUserModel) => Promise<User>;
+  add: (user: AddUserModel) => Promise<UserModel>;
 }

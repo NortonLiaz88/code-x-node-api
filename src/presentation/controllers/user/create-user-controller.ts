@@ -13,7 +13,7 @@ export class CreateUserController {
     @HttpCode(200)
     async handle (@Body() addUserDto: AddUserDto) {
         try {
-            const user = await this.userService.addUser(addUserDto);
+            const user = await this.userService.createUser(addUserDto);
             return user;
         } catch (err) {
             if (err instanceof HttpException) {

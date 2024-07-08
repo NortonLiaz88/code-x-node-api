@@ -1,5 +1,5 @@
 import { JwtService } from '@nestjs/jwt';
-import { DbAddUser } from 'src/data/usecases/db-add-user-repository';
+import { DbAddUser } from 'src/data/usecases/user/add-user/db-add-user';
 import { EncrypterAdapter } from 'src/infra/cryptography/encrypter';
 import { TokenGeneratorAdapter } from 'src/infra/cryptography/token-generator';
 import { PrismaClientService } from 'src/infra/orm/prisma/prisma-client.service';

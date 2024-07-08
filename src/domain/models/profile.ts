@@ -1,9 +1,7 @@
-import { Destination, Interest, Knowledge, Language } from '../enums';
-import { User } from './user';
+import { Knowledge, Language, Interest, Destination } from "@prisma/client";
 
 export interface Profile {
   id: number;
-  user: User;
   userId: number;
   knowledge: Knowledge;
   profileImage?: string;

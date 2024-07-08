@@ -1,10 +1,11 @@
-import { AddUser, AddUserModel } from 'src/domain/usecases/user/add-user';
-import { AddUserRepository } from '../protocols/db/user/add-user-repository';
-import { Encrypter } from '../protocols/cryptography/encrypter';
-import { GetAccountByEmailRepository } from '../protocols/db/authentication/db-get-account-by-email';
-import { GetAccountByUsernameRepository } from '../protocols/db/authentication/db-get-account-by-username';
-import { User } from 'src/domain/models/user';
 import { HttpException } from '@nestjs/common';
+import { UserModel } from 'src/domain/models/user';
+import { AddUser, AddUserModel } from 'src/domain/usecases/user/add-user/add-user';
+
+import { AddUserRepository } from '../../../protocols/db/user/db-add-user-repository';
+import { Encrypter } from '../../../protocols/cryptography/encrypter';
+import { GetAccountByEmailRepository } from '../../../protocols/db/authentication/db-get-account-by-email';
+import { GetAccountByUsernameRepository } from '../../../protocols/db/authentication/db-get-account-by-username';
 
 export class DbAddUser implements AddUser {
   constructor(
@@ -14,7 +15,7 @@ export class DbAddUser implements AddUser {
     private readonly loadAccountByNameRepository: GetAccountByUsernameRepository,
   ) {}
 
-  async add(data: AddUserModel): Promise<User> {
+  async add(data: AddUserModel): Promise<UserModel> {
     const accountByEmail = await this.loadAccountByEmailRepository.getByEmail(
       data.email,
     );

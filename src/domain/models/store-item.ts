@@ -1,4 +1,4 @@
-import { ItemType } from '../enums/item-type';
+import { ItemType } from '@prisma/client';
 import { Purchase } from './purchase';
 
 export class StoreItem {

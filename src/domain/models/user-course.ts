@@ -1,9 +1,8 @@
 import { DailyProgress } from './daily-progress';
-import { User } from './user';
+import { UserModel } from './user';
 
 export interface UserCourse {
   id: number;
-  user: User;
   userId: number;
   active: boolean;
   experience: number;

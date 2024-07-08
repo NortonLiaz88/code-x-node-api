@@ -1,4 +1,4 @@
-import { CourseLevel, Language } from '../enums';
+import { CourseLevel, Language } from "@prisma/client";
 
 export interface Course {
   id: number;

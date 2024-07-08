@@ -1,5 +1,5 @@
-import { User } from 'src/domain/models/user';
+import { UserModel } from 'src/domain/models/user';
 
 export interface GetAccountByUsernameRepository {
-  getByUsername: (username: string) => Promise<User | null>;
+  getByUsername: (username: string) => Promise<UserModel | null>;
 }

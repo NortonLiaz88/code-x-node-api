@@ -4,7 +4,7 @@ import { Schedule } from './schedule';
 import { UserCourse } from './user-course';
 import { UserPreference } from './user-preference';
 
-export interface User {
+export interface UserModel {
   id: number;
   email: string;
   password: string;

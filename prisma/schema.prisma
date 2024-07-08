@@ -35,7 +35,7 @@ model User {
   profile        Profile?
   createdAt      DateTime        @default(now())
   updatedAt      DateTime        @updatedAt
-  UserPreference UserPreference?
+  userPreference UserPreference?
   purchases      Purchase[]
   diamonds       Int             @default(0)
   experience     Float           @default(0)
