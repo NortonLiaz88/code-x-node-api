@@ -1,6 +1,5 @@
 // user-creation-profile.dto.ts
 import { ApiProperty, ApiPropertyOptional } from '@nestjs/swagger';
-import { Knowledge, Language, Interest, Destination } from '@prisma/client';
 import { Type } from 'class-transformer';
 import {
   IsEmail,
@@ -10,6 +9,7 @@ import {
   IsString,
   ValidateNested,
 } from 'class-validator';
+import { Destination, Interest, Knowledge, Language } from 'src/domain/enums';
 
 export class UserCreationProfileDto {
   @ApiProperty({ enum: Knowledge })

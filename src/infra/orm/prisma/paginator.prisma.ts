@@ -1,14 +1,12 @@
-import { StagePalletTasks } from 'src/domain/models/user-pallet-tasks';
 
 export interface IMetaPagination {
   total: number;
   lastPage: number;
   currentPage: number;
   perPage: number;
-  // prev: number | null;
-  // next: number | null;
+ 
 }
-export interface PaginatedResultT extends StagePalletTasks {
+export interface PaginatedResultT  {
   meta: IMetaPagination;
 }
 
