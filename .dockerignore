@@ -1,0 +1,4 @@
+./dist
+./minio
+./data
+./node_modules

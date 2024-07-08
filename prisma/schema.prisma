@@ -1,0 +1,221 @@
+// This is your Prisma schema file,
+// learn more about it in the docs: https://pris.ly/d/prisma-schema
+
+// Looking for ways to speed up your queries, or scale easily with your serverless or edge functions?
+// Try Prisma Accelerate: https://pris.ly/cli/accelerate-init
+
+generator client {
+  provider      = "prisma-client-js"
+  binaryTargets = ["native", "debian-openssl-3.0.x", "linux-musl", "linux-musl-arm64-openssl-1.1.x"]
+}
+
+datasource db {
+  provider = "postgresql"
+  url      = env("DATABASE_URL")
+}
+
+// schema.prisma
+
+enum ItemType {
+  FONT
+  WALLPAPER
+  SOUND_EFFECT
+}
+
+model User {
+  id             Int             @id @default(autoincrement())
+  email          String          @unique
+  password       String
+  username       String          @unique
+  name           String
+  lastName       String
+  phoneNumber    String          @unique @db.VarChar(20)
+  userCourse     UserCourse[]
+  schedule       Schedule?
+  profile        Profile?
+  createdAt      DateTime        @default(now())
+  updatedAt      DateTime        @updatedAt
+  UserPreference UserPreference?
+  purchases      Purchase[]
+  diamonds       Int             @default(0)
+  experience     Float           @default(0)
+}
+
+model Chat {
+  id          Int       @id @default(autoincrement())
+  referenceId String
+  name        String?
+  messages    Message[]
+  createdAt   DateTime  @default(now())
+  updatedAt   DateTime  @updatedAt
+}
+
+model Message {
+  id        Int      @id @default(autoincrement())
+  fromUser  Boolean
+  text      String
+  createdAt DateTime @default(now())
+  Chat      Chat?    @relation(fields: [chatId], references: [id])
+  chatId    Int?
+}
+
+model Profile {
+  id                        Int         @id @default(autoincrement())
+  user                      User        @relation(fields: [userId], references: [id])
+  userId                    Int         @unique
+  knowledge                 Knowledge
+  profileImage              String?
+  programmingLanguages      Language[]
+  activeProgrammingLanguage Language
+  interests                 Interest
+  destination               Destination
+  anotherInterest           String?
+  anotherDestination        String?
+  createdAt                 DateTime    @default(now())
+  updatedAt                 DateTime    @updatedAt
+}
+
+model UserPreference {
+  id           Int     @id @default(autoincrement())
+  user         User    @relation(fields: [userId], references: [id])
+  userId       Int     @unique
+  soundEffects Boolean @default(true)
+  vibration    Boolean @default(true)
+  notification Boolean @default(true)
+}
+
+model Progress {
+  id                    Int   @id @default(autoincrement())
+  consecutiveDays       Int
+  exercises             Int
+  chat                  Int
+  accumulatedDiamonds   Int
+  accumulatedExpirience Float
+  done                  Int
+  accumulatedTime       Float
+}
+
+model Course {
+  id       Int         @id @default(autoincrement())
+  name     String
+  language Language
+  level    CourseLevel
+  // atividades  Atividade
+}
+
+model UserCourse {
+  id            Int             @id @default(autoincrement())
+  user          User            @relation(fields: [userId], references: [id])
+  userId        Int
+  active        Boolean         @default(true)
+  experience    Float
+  createdAt     DateTime        @default(now())
+  updatedAt     DateTime        @updatedAt
+  DailyProgress DailyProgress[]
+}
+
+model DailyProgress {
+  id           Int        @id @default(autoincrement())
+  userCourse   UserCourse @relation(fields: [userCourseId], references: [id])
+  userCourseId Int
+  schedule     Schedule   @relation(fields: [scheduleId], references: [id])
+  scheduleId   Int
+  date         DateTime   @default(now())
+  experience   Float
+}
+
+model Schedule {
+  id            Int             @id @default(autoincrement())
+  user          User            @relation(fields: [userId], references: [id])
+  userId        Int             @unique
+  name          String
+  icon          String
+  color         String
+  goalCount     Int
+  goalFrequency Int
+  days          DayOfWeek[]
+  timeSlot      TimeSlot
+  remind        Boolean         @default(true)
+  DailyProgress DailyProgress[]
+}
+
+model StoreItem {
+  id          Int        @id @default(autoincrement())
+  name        String
+  description String?
+  price       Int // price in diamonds
+  type        ItemType
+  requiredExp Float // experience required to unlock the item
+  purchases   Purchase[] // Add this line for the relation
+}
+
+model Purchase {
+  id          Int       @id @default(autoincrement())
+  user        User      @relation(fields: [userId], references: [id])
+  userId      Int
+  item        StoreItem @relation(fields: [itemId], references: [id])
+  itemId      Int
+  purchasedAt DateTime  @default(now())
+}
+
+enum CourseLevel {
+  BEGINNER
+  INTERMEDIATE
+  ADVANCED
+}
+
+enum Language {
+  JAVASCRIPT
+  PYTHON
+  JAVA
+  CSHARP
+  CPLUSPLUS
+  RUBY
+  SWIFT
+  GO
+  KOTLIN
+  PHP
+  TYPESCRIPT
+  RUST
+  DART
+  SCALA
+  R
+}
+
+enum Knowledge {
+  NOVICE
+  BEGINNER
+  MIDDLE
+}
+
+enum Interest {
+  ALGORITHMS
+  CONDITIONAL
+  LOOPS
+  VARIABLES
+  ANOTHER
+}
+
+enum Destination {
+  ACADEMIC
+  WEB
+  DATASCIENCE
+  MOBILE
+  ANOTHER
+}
+
+enum DayOfWeek {
+  MONDAY
+  TUESDAY
+  WEDNESDAY
+  THURSDAY
+  FRIDAY
+  SATURDAY
+  SUNDAY
+}
+
+enum TimeSlot {
+  MORNING // 07:00 - 11:00
+  AFTERNOON // 12:00 - 18:00
+  EVENING // 18:00 - 00:00
+}

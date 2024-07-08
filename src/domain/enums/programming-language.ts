@@ -1,0 +1,17 @@
+export enum Language {
+  JAVASCRIPT = 'JAVASCRIPT',
+  PYTHON = 'PYTHON',
+  JAVA = 'JAVA',
+  CSHARP = 'CSHARP',
+  CPLUSPLUS = 'CPLUSPLUS',
+  RUBY = 'RUBY',
+  SWIFT = 'SWIFT',
+  GO = 'GO',
+  KOTLIN = 'KOTLIN',
+  PHP = 'PHP',
+  TYPESCRIPT = 'TYPESCRIPT',
+  RUST = 'RUST',
+  DART = 'DART',
+  SCALA = 'SCALA',
+  R = 'R',
+}

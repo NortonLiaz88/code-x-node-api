@@ -1,0 +1,22 @@
+version: '3.8'
+services:
+  codex-container:
+    container_name: codex_api
+    build:
+      dockerfile: Dockerfile
+      context: .
+      target: development
+    volumes:
+      - '.:/app'
+      - '/app/node_modules'
+    ports:
+      - '8000:8000'
+    command: npm run start:dev
+    # restart: unless-stopped
+    networks:
+      - codex-networks
+
+networks:
+  codex-networks:
+    name: 'codex-networks'
+    external: true
