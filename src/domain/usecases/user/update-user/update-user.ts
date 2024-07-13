@@ -1,4 +1,4 @@
-import { UserModel } from "src/domain/models/user";
+import { GetUserModel, UserModel } from "src/domain/models/user";
 
 
 export type UpdateUserModel = {
@@ -13,7 +13,7 @@ export type UpdateUserModel = {
 };
 
 export interface UpdateUser {
-  update(id: number, request: Partial<UpdateUserModel>): Promise<UserModel>;
+  update(id: number, request: Partial<UpdateUserModel>): Promise<GetUserModel>;
 
   isEditableUser(id: number): Promise<boolean>;
 }

@@ -2,7 +2,7 @@ import {
   PaginatedResult,
   PaginationInfo,
 } from 'src/domain/commons/base/pagination.base';
-import { UserModel } from 'src/domain/models/user';
+import { GetUserModel, UserModel } from 'src/domain/models/user';
 
 export enum OrderByUser {
   Name = 'name',
@@ -27,5 +27,5 @@ export interface GetPaginatedUsers {
     pagination: PaginationInfo,
     ordering: OrderedUser,
     search?: string,
-  ): Promise<PaginatedResult<UserModel>>;
+  ): Promise<PaginatedResult<GetUserModel>>;
 }

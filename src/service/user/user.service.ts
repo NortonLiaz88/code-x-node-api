@@ -105,12 +105,6 @@ export class UserService {
       throw new NotFoundException('User Not Found');
     }
 
-    const isEditableUser = await this.dbUpdateUser.isEditableUser(id);
-
-    if (!isEditableUser) {
-      throw new UnprocessableEntityException('User is not editable');
-    }
-
     if (currentUser.email != userData.email) {
       const existEmail = await this.dbExistUser.existUserWithEmail(
         userData.email,
@@ -148,6 +142,7 @@ export class UserService {
       updatedUser.password = await this.encrypter.encrypt(userData.password);
     }
 
+    delete updatedUser.id;
     const result = await this.dbUpdateUser.update(id, updatedUser);
 
     return result;

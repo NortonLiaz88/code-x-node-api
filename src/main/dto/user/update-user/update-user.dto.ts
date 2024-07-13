@@ -40,11 +40,11 @@ export class UserUpdateDto {
   @IsEmail()
   email: string;
 
-  @ApiProperty({ type: 'integer', minimum: 1 })
-  @IsNumber()
-  @IsNotEmpty()
-  @IsDefined()
-  @IsInt()
-  @IsPositive()
-  profileId: number;
+  // @ApiProperty({ type: 'integer', minimum: 1 })
+  // @IsNumber()
+  // @IsNotEmpty()
+  // @IsDefined()
+  // @IsInt()
+  // @IsPositive()
+  // profileId: number;
 }

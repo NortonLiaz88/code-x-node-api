@@ -1,4 +1,4 @@
-import { UserModel } from 'src/domain/models/user';
+import { GetUserModel, UserModel } from 'src/domain/models/user';
 import { AddUserRepository } from 'src/data/protocols/db/user/db-add-user-repository';
 import { GetAccountByUsernameRepository } from 'src/data/protocols/db/authentication/db-get-account-by-username';
 import { GetAccountByEmailRepository } from 'src/data/protocols/db/authentication/db-get-account-by-email';
@@ -15,7 +15,6 @@ import {
 } from 'src/domain/commons/base/pagination.base';
 import { OrderedUser } from 'src/domain/usecases/user/get-all-users/get-paginated-users';
 import { UpdateUserModel } from 'src/domain/usecases/user/update-user/update-user';
-
 
 export class UserPostgresRepository
   implements
@@ -35,7 +34,6 @@ export class UserPostgresRepository
     ordering: OrderedUser,
     search?: string,
   ): Promise<PaginatedResult<UserModel>> {
-
     const total = await this.ormService.user.count();
 
     const lastPage = Math.ceil(total / pagination.take);
@@ -52,7 +50,7 @@ export class UserPostgresRepository
         purchases: true,
         schedule: true,
         userCourse: true,
-        userPreference: true
+        userPreference: true,
       },
       where: {
         OR: [
@@ -63,10 +61,7 @@ export class UserPostgresRepository
                   contains: search?.toString() ?? '',
                 },
               },
-              {
-
-              }
-              
+              {},
             ],
           },
         ],
@@ -82,35 +77,36 @@ export class UserPostgresRepository
       currentPage: +pagination.page,
       perPage: +pagination.take,
     };
-    
-    const currenData: UserModel[] = record?.map((userData ) => {
-      const user = {...userData};
+
+    const currenData: UserModel[] = record?.map((userData) => {
+      const user = { ...userData };
       delete user.password;
       return user;
     });
 
     const result = {
       data: currenData,
-      meta
-    }
+      meta,
+    };
 
     return result;
   }
-  async getById(id: number): Promise<UserModel> {
+
+  async getById(id: number): Promise<GetUserModel> {
     const user = await this.ormService.user.findFirst({
       where: {
         id: id,
       },
     });
 
-    delete user.password;
-    return user;
+    const userWithoutPassword = this.exclude(user, ['password'])
+    return userWithoutPassword;
   }
 
   async updateUser(
     id: number,
     user: Partial<UpdateUserModel>,
-  ): Promise<UserModel> {
+  ): Promise<GetUserModel> {
     const updatedUser = await this.ormService.user.update({
       where: {
         id: id,
@@ -120,10 +116,11 @@ export class UserPostgresRepository
       },
     });
 
-    return updatedUser;
+    const userWithoutPassword = this.exclude(updatedUser, ['password'])
+    return userWithoutPassword;
   }
 
-  async add(user: AddUserModel): Promise<UserModel> {
+  async add(user: AddUserModel): Promise<GetUserModel> {
     const newUser = await this.ormService.user.create({
       data: {
         email: user.email,
@@ -149,31 +146,28 @@ export class UserPostgresRepository
       },
     });
 
-    return newUser;
+    const userWithoutPassword = this.exclude(newUser, ['password'])
+    return userWithoutPassword;
   }
 
-  async getByEmail(email: string): Promise<UserModel | null> {
-    const user = await this.ormService.user.findFirst({
+  async getByEmail(email: string): Promise<GetUserModel | null> {
+    const user = await this.ormService.user.findUnique({
       where: {
         email: email,
       },
     });
-
-    const currentUser = {...user};
-    delete currentUser.password;
-    return currentUser;
+    console.log('user ==>', user);
+    return user ? this.exclude(user, ['password']) : null;
   }
 
-  async getByUsername(username: string): Promise<UserModel | null> {
+  async getByUsername(username: string): Promise<GetUserModel | null> {
     const user = await this.ormService.user.findFirst({
       where: {
         username: username,
       },
     });
-    
-    const currentUser = {...user};
-    delete currentUser.password;
-    return currentUser;
+
+    return user ? this.exclude(user, ['password']) : null;
   }
 
   async existUserWithUsername(username: string): Promise<boolean> {
@@ -209,5 +203,14 @@ export class UserPostgresRepository
   async isRemovableUser(id: number): Promise<boolean> {
     const result = await this.ormService.user.findFirst({ where: { id } });
     return result.experience > 0 || result.diamonds > 0;
+  }
+
+  exclude<User, Key extends keyof User>(
+    user: User,
+    keys: Key[],
+  ): Omit<User, Key> {
+    return Object.fromEntries(
+      Object.entries(user).filter(([key]) => !keys.includes(key as Key)),
+    ) as Omit<User, Key>;
   }
 }

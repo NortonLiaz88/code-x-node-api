@@ -3,7 +3,7 @@ import {
   PaginatedResult,
   PaginationInfo,
 } from 'src/domain/commons/base/pagination.base';
-import { UserModel } from 'src/domain/models/user';
+import { GetUserModel, UserModel } from 'src/domain/models/user';
 import {
   GetPaginatedUsers,
   OrderedUser,
@@ -18,7 +18,7 @@ export class DbGetPaginatedUsers implements GetPaginatedUsers {
     pagination: PaginationInfo,
     ordering: OrderedUser,
     search?: string,
-  ): Promise<PaginatedResult<UserModel>> {
+  ): Promise<PaginatedResult<GetUserModel>> {
     return this.getPaginatedUsersRepository.getPaginatedUsers(
       pagination,
       ordering,

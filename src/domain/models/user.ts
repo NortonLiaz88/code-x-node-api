@@ -24,3 +24,5 @@ export interface UserModel {
   createdAt: Date;
   updatedAt: Date;
 }
+
+export type GetUserModel =  Omit<UserModel, 'password'>;

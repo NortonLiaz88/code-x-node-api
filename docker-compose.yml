@@ -2,6 +2,8 @@ version: '3.8'
 services:
   codex-container:
     container_name: codex_api
+    env_file:
+      - .env  # Path to your .env file
     build:
       dockerfile: Dockerfile
       context: .
@@ -10,7 +12,7 @@ services:
       - '.:/app'
       - '/app/node_modules'
     ports:
-      - '8000:8000'
+      - '8888:8000'
     command: npm run start:dev
     # restart: unless-stopped
     networks:
