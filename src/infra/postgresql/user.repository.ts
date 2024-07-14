@@ -155,6 +155,9 @@ export class UserPostgresRepository
       where: {
         email: email,
       },
+      include: {
+        profile: true,
+      },
     });
    
     return user;
@@ -164,6 +167,9 @@ export class UserPostgresRepository
     const user = await this.ormService.user.findFirst({
       where: {
         username: username,
+      },
+      include: {
+        profile: true,
       },
     });
 
