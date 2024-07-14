@@ -10,6 +10,7 @@ async function bootstrap() {
   .setDescription('API do CodeX')
   .setVersion('1.0')
   .addBearerAuth()
+  .addBearerAuth()
   .build();
   const document = SwaggerModule.createDocument(app, config);
   SwaggerModule.setup('docs', app, document);

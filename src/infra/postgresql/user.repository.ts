@@ -156,8 +156,8 @@ export class UserPostgresRepository
         email: email,
       },
     });
-    console.log('user ==>', user);
-    return user ? this.exclude(user, ['password']) : null;
+   
+    return user;
   }
 
   async getByUsername(username: string): Promise<GetUserModel | null> {

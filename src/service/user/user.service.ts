@@ -90,6 +90,8 @@ export class UserService {
 
     user.password = await this.encrypter.encrypt(user.password);
 
+    console.log('USER PASSWORD', user.password);
+
     const result = await this.dbCreateUser.add(user);
 
     return result;

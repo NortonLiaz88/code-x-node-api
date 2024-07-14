@@ -30,15 +30,12 @@ export class DbAddUser implements AddUser {
     const { email, lastName, name, password, phoneNumber, username, profile } =
       data;
 
-    const hashedPassword = await this.encrypter.encrypt(password);
-
-    console.log('hashedPassword ==>', hashedPassword);
-    console.log('data ==>', data); 
+   
     const result = await this.addAccountRepository.add({
       email,
       lastName,
       name,
-      password: hashedPassword,
+      password,
       phoneNumber,
       username,
       profile,

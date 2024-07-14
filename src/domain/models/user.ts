@@ -7,7 +7,7 @@ import { UserPreference } from './user-preference';
 export interface UserModel {
   id: number;
   email: string;
-  password: string;
+  password?: string;
   username: string;
   name: string;
   lastName: string;
@@ -25,4 +25,4 @@ export interface UserModel {
   updatedAt: Date;
 }
 
-export type GetUserModel =  Omit<UserModel, 'password'>;
+export type GetUserModel =  UserModel;

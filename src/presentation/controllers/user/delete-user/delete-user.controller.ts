@@ -1,8 +1,8 @@
 import { Controller, Delete, HttpCode, Param } from '@nestjs/common';
-import { ApiTags, ApiOAuth2 } from '@nestjs/swagger';
+import { ApiTags, ApiOAuth2, ApiBearerAuth } from '@nestjs/swagger';
 import { UserService } from 'src/service/user/user.service';
 
-
+@ApiBearerAuth()
 @ApiTags('users')
 @Controller('users')
 export class DeleteUserController {

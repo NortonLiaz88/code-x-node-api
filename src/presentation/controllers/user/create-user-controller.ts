@@ -1,14 +1,19 @@
-import { Body, Controller, HttpCode, HttpException, Post } from "@nestjs/common";
-import { ApiTags } from "@nestjs/swagger";
+import { Body, Controller, HttpCode, HttpException, Post, SetMetadata, UnauthorizedException } from "@nestjs/common";
+import { ApiExtraModels, ApiTags } from "@nestjs/swagger";
+import { LoginResponseDto } from "src/main/dto/auth/login-response.dto";
 import { AddUserDto } from "src/main/dto/user/add-user/add-user.dto";
 import { UserService } from "src/service/user/user.service";
 
+export const IS_PUBLIC_KEY = 'isPublic';
+export const Public = () => SetMetadata(IS_PUBLIC_KEY, true);
 
-@ApiTags('users')
+@ApiExtraModels(LoginResponseDto, UnauthorizedException)
+@ApiTags('auth')
 @Controller('users')
 export class CreateUserController {
     constructor(private readonly userService: UserService) {}
 
+    @Public()
     @Post()
     @HttpCode(200)
     async handle (@Body() addUserDto: AddUserDto) {
