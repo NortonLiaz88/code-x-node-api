@@ -89,15 +89,15 @@ export class UserCreationSchedule {
 }
 
 export class AddUserDto {
-  @ApiProperty()
-  @IsNotEmpty()
-  @IsString()
-  name: string;
+  // @ApiProperty()
+  // @IsNotEmpty()
+  // @IsString()
+  // name: string;
 
-  @ApiProperty()
-  @IsNotEmpty()
-  @IsString()
-  lastName: string;
+  // @ApiProperty()
+  // @IsNotEmpty()
+  // @IsString()
+  // lastName: string;
 
   @ApiProperty()
   @IsNotEmpty()
@@ -109,10 +109,10 @@ export class AddUserDto {
   @IsString()
   username: string;
 
-  @ApiProperty()
-  @IsNotEmpty()
-  @IsString()
-  phoneNumber: string;
+  // @ApiProperty()
+  // @IsNotEmpty()
+  // @IsString()
+  // phoneNumber: string;
 
   @ApiProperty()
   @IsNotEmpty()

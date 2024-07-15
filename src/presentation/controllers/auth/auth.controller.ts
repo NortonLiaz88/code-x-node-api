@@ -96,7 +96,7 @@ export class AuthController {
   @ApiErrorDecorator(HttpStatus.INTERNAL_SERVER_ERROR, 'Internal Server')
   async singUp(@Body() body: AddUserDto) {
     try {
-      await this.authService.addAccount({ ...body });
+      return body;
     } catch (err) {
       if (err instanceof HttpException) {
         return new HttpException(err.message, err.getStatus());

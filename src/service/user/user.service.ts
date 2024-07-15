@@ -58,10 +58,7 @@ export class UserService {
     return user;
   }
 
-  async createUser(
-    userData: AddUserDto,
-  ): Promise<UserResponseDto> {
-
+  async createUser(userData: AddUserDto): Promise<UserResponseDto> {
     const existEmail = await this.dbExistUser.existUserWithEmail(
       userData.email,
     );
@@ -78,15 +75,21 @@ export class UserService {
       throw new ConflictException('Username already registered');
     }
 
-    const existPhoneNumber = await this.dbExistUser.existUserWithPhoneNumber(
-      userData.phoneNumber,
-    );
+    // const existPhoneNumber = await this.dbExistUser.existUserWithPhoneNumber(
+    //   userData.phoneNumber,
+    // );
 
-    if (existPhoneNumber) {
-      throw new ConflictException('Phone number already registered');
-    }
+    // if (existPhoneNumber) {
+    //   throw new ConflictException('Phone number already registered');
+    // }
 
-    const user = {...userData};
+    const user = {
+      ...userData,
+      lastName: userData.username,
+      phoneNumber: userData.username,
+      name: userData.username,
+      activeProgrammingLanguage: userData.profile.programmingLanguage,
+    };
 
     user.password = await this.encrypter.encrypt(user.password);
 
@@ -126,7 +129,6 @@ export class UserService {
         throw new ConflictException('Username already registered');
       }
     }
-
 
     if (currentUser.phoneNumber != userData.phoneNumber) {
       const existPhoneNumber = await this.dbExistUser.existUserWithPhoneNumber(
