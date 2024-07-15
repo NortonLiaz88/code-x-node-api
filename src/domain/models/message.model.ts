@@ -1,6 +1,7 @@
 interface MessageModel {
     id: string;
-    fromUser: boolean;
-    text: string;
+    role: 'user' | 'assistant';
+    content: string;
+    tooltip?: string[];
     createdAt: Date;
 }

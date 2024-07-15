@@ -10,7 +10,9 @@ import { MongooseModule } from '@nestjs/mongoose';
 @Module({
   imports: [
     ConfigModule.forRoot({ isGlobal: true }),
-    MongooseModule.forRoot(process.env.MONGO_URL),
+    MongooseModule.forRoot('mongodb://admin:adminadmin@82.197.92.146:27017', {
+      dbName: 'codex'
+    }),
     UserModule,
     AuthModule,
     ChatModule,

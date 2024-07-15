@@ -16,7 +16,7 @@ export type SessionDocument = HydratedDocument<Session>;
 //   tooltip: string[] | null;
 // }
 
-@Schema({ versionKey: false, timestamps: { createdAt: 'created_at' } })
+@Schema({ versionKey: false, timestamps: { createdAt: 'created_at' } , collection: 'sessions' })
 export class Session {
   @Prop({ type: String, required: true })
   id: string;
