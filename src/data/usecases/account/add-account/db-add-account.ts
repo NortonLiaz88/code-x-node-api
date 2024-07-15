@@ -33,6 +33,7 @@ export class DbAddAccount implements AddAccount {
       username,
       phoneNumber,
       profile,
+      schedule,
       email } = data;
 
     const hashedPassword = await this.encrypter.encrypt(password);
@@ -45,6 +46,7 @@ export class DbAddAccount implements AddAccount {
       email,
       profile,
       password: hashedPassword,
+      schedule
     });
   }
 }

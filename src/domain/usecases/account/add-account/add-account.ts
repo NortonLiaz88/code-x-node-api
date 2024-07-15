@@ -8,6 +8,7 @@ export interface AddAccountModel {
   phoneNumber: string;
   email: string;
   profile: UserCreationProfile;
+  schedule: any;
 }
 
 export interface AddAccount {

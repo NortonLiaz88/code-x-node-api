@@ -129,6 +129,18 @@ export class UserPostgresRepository
         password: user.password,
         phoneNumber: user.phoneNumber,
         username: user.username,
+        schedule: {
+          create: {
+            name: user.schedule.name,
+            icon: user.schedule.icon,
+            color: user.schedule.color,
+            goalCount: user.schedule.goalCount,
+            goalFrequency: user.schedule.goalFrequency,
+            days: user.schedule.days,
+            timeSlot: user.schedule.timeSlot,
+            remind: user.schedule.remind,
+          },
+        },
         profile: {
           create: {
             knowledge: user.profile.knowledge,

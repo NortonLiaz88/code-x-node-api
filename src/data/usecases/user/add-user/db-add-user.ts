@@ -27,7 +27,7 @@ export class DbAddUser implements AddUser {
       console.log('User already exists ==>', accountByEmail, accountByName);
       throw new HttpException('User already exists', 409);
     }
-    const { email, lastName, name, password, phoneNumber, username, profile } =
+    const { email, lastName, name, password, phoneNumber, username, profile, schedule } =
       data;
 
    
@@ -39,6 +39,7 @@ export class DbAddUser implements AddUser {
       phoneNumber,
       username,
       profile,
+      schedule
     });
 
     return result;

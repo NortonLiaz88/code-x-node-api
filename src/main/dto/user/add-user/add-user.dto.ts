@@ -3,11 +3,13 @@ import { ApiProperty, ApiPropertyOptional } from '@nestjs/swagger';
 import { Type } from 'class-transformer';
 import {
   IsArray,
+  IsBoolean,
   IsDate,
   IsEmail,
   IsEnum,
   IsInt,
   IsNotEmpty,
+  IsNumber,
   IsOptional,
   IsString,
   ValidateNested,
@@ -17,7 +19,7 @@ import { PurchaseDto } from '../../purchase/purchase.dto';
 import { ScheduleDto } from '../../schedule/schedule.dto';
 import { UserCourseDto } from '../../user-course/user-course.dto';
 import { UserPreferenceDto } from '../../user-preference/user-preference.dto';
-import { Knowledge, Language, Interest, Destination } from '@prisma/client';
+import { Knowledge, Language, Interest, Destination, DayOfWeek, TimeSlot } from '@prisma/client';
 
 export class UserCreationProfileDto {
   @ApiProperty({ enum: Knowledge })
@@ -45,6 +47,45 @@ export class UserCreationProfileDto {
   @IsOptional()
   @IsString()
   anotherDestination?: string;
+}
+
+
+
+export class UserCreationSchedule {
+  @ApiPropertyOptional()
+  @IsString()
+  name: string;
+
+  @ApiPropertyOptional()
+  @IsOptional()
+  @IsString()
+  icon: string;
+
+  @ApiPropertyOptional()
+  @IsOptional()
+  @IsString()
+  color: string;
+  
+  @ApiProperty()
+  @IsNumber()
+  goalCount: number;
+
+  @ApiProperty()
+  @IsNumber()
+  goalFrequency: number;
+
+  @ApiProperty({ enum: DayOfWeek, isArray: true, description: "Array of days of the week" })
+  @IsArray()
+  @IsEnum(DayOfWeek, { each: true })
+  days: DayOfWeek[];
+
+  @ApiProperty({ enum: TimeSlot })
+  @IsEnum(TimeSlot)
+  timeSlot: TimeSlot;
+
+  @ApiProperty({ type: [Boolean], default: true})
+  @IsBoolean()
+  remind: boolean;
 }
 
 export class AddUserDto {
@@ -82,6 +123,11 @@ export class AddUserDto {
   @ValidateNested()
   @Type(() => UserCreationProfileDto)
   profile: UserCreationProfileDto;
+
+  @ApiProperty({ type: UserCreationSchedule })
+  @ValidateNested()
+  @Type(() => UserCreationSchedule)
+  schedule: UserCreationSchedule;
 }
 
 export class UserResponseDto {
