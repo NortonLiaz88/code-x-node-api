@@ -6,6 +6,7 @@ import { AuthModule } from './main/usecases/auth/auth.module';
 import { ChatModule } from './main/usecases/chat/chat.module';
 import { ConfigModule } from '@nestjs/config';
 import { MongooseModule } from '@nestjs/mongoose';
+import { ScheduleModule } from './main/usecases/schedule/schedule.module';
 
 @Module({
   imports: [
@@ -16,6 +17,7 @@ import { MongooseModule } from '@nestjs/mongoose';
     UserModule,
     AuthModule,
     ChatModule,
+    ScheduleModule,
   ],
   controllers: [],
   providers: [AppService],

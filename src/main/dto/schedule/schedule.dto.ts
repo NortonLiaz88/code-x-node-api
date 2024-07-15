@@ -37,5 +37,7 @@ export class ScheduleDto {
   @ApiProperty({ example: true })
   @IsBoolean()
   remind: boolean;
-
 }
+
+
+export class ScheduleResponseDto extends ScheduleDto {}
