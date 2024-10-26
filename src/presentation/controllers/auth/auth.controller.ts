@@ -42,6 +42,7 @@ export class AuthController {
   @ApiErrorDecorator(HttpStatus.INTERNAL_SERVER_ERROR, 'Internal Server')
   async login(@Body() body: LoginDto) {
     try {
+      console.log('Login With Credentials', body);
       const userValidation = await this.authService.loginWithCredentials({
         email: body.email,
         password: body.password,

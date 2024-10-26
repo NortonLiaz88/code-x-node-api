@@ -14,8 +14,8 @@ export class LoginDto {
   })
   @IsStrongPassword({
     minLength: 6,
-    minLowercase: 1,
-    minUppercase: 1,
+    minLowercase: 0,
+    minUppercase: 0,
     minNumbers: 1,
     minSymbols: 0,
   })

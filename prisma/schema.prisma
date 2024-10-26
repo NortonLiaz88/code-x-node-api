@@ -104,6 +104,7 @@ model Course {
   name     String
   language Language
   level    CourseLevel
+  userCourse UserCourse[]
   activties Activity[]
 }
 
@@ -111,8 +112,10 @@ model Activity {
   id          Int       @id @default(autoincrement())
   name        String
   description String
+  referenceId String    @unique
   course      Course    @relation(fields: [courseId], references: [id])
   courseId    Int
+  finished    Boolean   @default(false)
 }
 
 model UserCourse {
@@ -123,7 +126,9 @@ model UserCourse {
   experience    Float
   createdAt     DateTime        @default(now())
   updatedAt     DateTime        @updatedAt
-  DailyProgress DailyProgress[]
+  dailyProgress DailyProgress[]
+  courseId      Int
+  course        Course          @relation(fields: [courseId], references: [id])
 }
 
 model DailyProgress {
@@ -171,27 +176,24 @@ model Purchase {
 }
 
 enum CourseLevel {
-  BEGINNER
-  INTERMEDIATE
-  ADVANCED
+  beginner
+  intermediate
+  advanced
 }
 
 enum Language {
-  JAVASCRIPT
-  PYTHON
-  JAVA
-  CSHARP
-  CPLUSPLUS
-  RUBY
-  SWIFT
-  GO
-  KOTLIN
-  PHP
-  TYPESCRIPT
-  RUST
-  DART
-  SCALA
+  Python
+  Java
+  CPlusPlus
+  JavaScript
+  Ruby
   R
+  CSharp
+  Kotlin
+  PHP
+  TypeScript
+  Rust
+  Perl
 }
 
 enum Knowledge {

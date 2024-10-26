@@ -17,7 +17,11 @@ services:
     # restart: unless-stopped
     networks:
       - codex-networks
-
+    deploy:
+      resources:
+        limits:
+          memory: 4g
+          cpus: '4'
 networks:
   codex-networks:
     name: 'codex-networks'
