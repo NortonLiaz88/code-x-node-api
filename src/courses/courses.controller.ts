@@ -2,10 +2,22 @@ import { Controller, Get, Post, Body, Patch, Param, Delete } from '@nestjs/commo
 import { CoursesService } from './courses.service';
 import { CreateCourseDto } from './dto/create-course.dto';
 import { UpdateCourseDto } from './dto/update-course.dto';
+import { CurrentUser } from 'src/main/decorators/current-user.decorator';
+import { ApiBearerAuth, ApiTags } from '@nestjs/swagger';
 
+@ApiBearerAuth()
+@ApiTags('courses')
 @Controller('courses')
 export class CoursesController {
   constructor(private readonly coursesService: CoursesService) {}
+
+  @Get('active')
+  async findActiveUserCourses(
+    @CurrentUser() user: any
+  ) {
+    console.log("USER",user);
+    return this.coursesService.findActiveUserCourses(user.payload.id);
+  }
 
   @Post()
   create(@Body() createCourseDto: CreateCourseDto) {

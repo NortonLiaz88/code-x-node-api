@@ -1,4 +1,4 @@
-import { PrismaClient } from '@prisma/client';
+import { CourseLevel, PrismaClient } from '@prisma/client';
 import * as bcrypt from 'bcrypt';
 
 const prisma = new PrismaClient();
@@ -32,6 +32,8 @@ async function seedAdmin() {
           active: true,
           createdAt: new Date(),
           updatedAt: new Date(),
+          courseLevel: CourseLevel.beginner,
+
         },
       },
     },

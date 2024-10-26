@@ -1,6 +1,6 @@
 import { Module } from '@nestjs/common';
 import { MongooseModule } from '@nestjs/mongoose';
-import { ActivityService } from './activity.service';
+import { CronActivityService } from './cron-activity.service';
 import {
   CodeOrganization,
   CodeOrganizationSchema,
@@ -10,6 +10,8 @@ import {
   CodeCompletionExerciseSchema,
 } from './entities/activity.entitie';
 import { PrismaModule } from 'src/infra/orm/prisma/prisma.module';
+import { ActivityController } from './activity.controller';
+import { ActivityService } from './activity.service';
 
 @Module({
   imports: [
@@ -26,6 +28,9 @@ import { PrismaModule } from 'src/infra/orm/prisma/prisma.module';
     ]),
     PrismaModule,
   ],
-  providers: [ActivityService],
+  controllers: [
+    ActivityController,
+  ],
+  providers: [CronActivityService, ActivityService],
 })
 export class ActivityModule {}

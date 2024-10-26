@@ -17,12 +17,12 @@ import { PurchaseDto } from '../../purchase/purchase.dto';
 import { ScheduleDto } from '../../schedule/schedule.dto';
 import { UserCourseDto } from '../../user-course/user-course.dto';
 import { UserPreferenceDto } from '../../user-preference/user-preference.dto';
-import { Knowledge, Language, Interest, Destination } from '@prisma/client';
+import { Language, Interest, Destination, CourseLevel } from '@prisma/client';
 
 export class UserCreationProfileDto {
-  @ApiProperty({ enum: Knowledge })
-  @IsEnum(Knowledge)
-  knowledge: Knowledge;
+  @ApiProperty({ enum: CourseLevel })
+  @IsEnum(CourseLevel)
+  knowledge: CourseLevel;
 
   @ApiProperty({ enum: Language })
   @IsEnum(Language)

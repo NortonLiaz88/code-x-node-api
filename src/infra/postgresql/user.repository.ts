@@ -15,6 +15,7 @@ import {
 } from 'src/domain/commons/base/pagination.base';
 import { OrderedUser } from 'src/domain/usecases/user/get-all-users/get-paginated-users';
 import { UpdateUserModel } from 'src/domain/usecases/user/update-user/update-user';
+import { CourseLevel } from '@prisma/client';
 
 export class UserPostgresRepository
   implements
@@ -79,7 +80,7 @@ export class UserPostgresRepository
     };
 
     const currenData: UserModel[] = record?.map((userData) => {
-      const user = { ...userData };
+      const user = { ...userData, knowledge: CourseLevel[userData.userCourse[0].courseLevel] };
       delete user.password;
       return user;
     });
@@ -131,7 +132,6 @@ export class UserPostgresRepository
         username: user.username,
         profile: {
           create: {
-            knowledge: user.profile.knowledge,
             activeProgrammingLanguage: user.profile.programmingLanguage,
             interests: user.profile.interests,
             destination: user.profile.destination,
@@ -143,6 +143,17 @@ export class UserPostgresRepository
             }),
           },
         },
+        userCourse: {
+          create: {
+            courseId: 1,
+            experience: 0, 
+            active: true,
+            createdAt: new Date(),
+            updatedAt: new Date(),
+            courseLevel: CourseLevel.beginner,
+  
+          },
+        }
       },
     });
 

@@ -6,10 +6,6 @@ export class ProfileDto {
   @IsInt()
   id: number;
 
-  @ApiProperty({ example: 'EXPERT' })
-  @IsString()
-  knowledge: string;
-
   @ApiProperty({ example: 'profile.jpg', required: false })
   @IsOptional()
   @IsString()

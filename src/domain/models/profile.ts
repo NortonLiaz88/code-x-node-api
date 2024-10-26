@@ -1,9 +1,8 @@
-import { Knowledge, Language, Interest, Destination } from "@prisma/client";
+import {Language, Interest, Destination } from "@prisma/client";
 
 export interface Profile {
   id: number;
   userId: number;
-  knowledge: Knowledge;
   profileImage?: string;
   programmingLanguages: Language[];
   activeProgrammingLanguage: Language;

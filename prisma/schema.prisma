@@ -65,7 +65,6 @@ model Profile {
   id                        Int         @id @default(autoincrement())
   user                      User        @relation(fields: [userId], references: [id])
   userId                    Int         @unique
-  knowledge                 Knowledge
   profileImage              String?
   programmingLanguages      Language[]
   activeProgrammingLanguage Language
@@ -112,10 +111,25 @@ model Activity {
   id          Int       @id @default(autoincrement())
   name        String
   description String
+  level       CourseLevel
+  type        ActivityType @default(code_organization)
   referenceId String    @unique
   course      Course    @relation(fields: [courseId], references: [id])
   courseId    Int
-  finished    Boolean   @default(false)
+  userActivities UserActivity[] // Relação com UserActivity
+}
+
+// Novo modelo para vincular UserCourse e Activity
+model UserActivity {
+  id           Int          @id @default(autoincrement())
+  userCourse   UserCourse   @relation(fields: [userCourseId], references: [id])
+  userCourseId Int
+  activity     Activity     @relation(fields: [activityId], references: [id])
+  activityId   Int
+  finished     Boolean      @default(false) // Status de finalização específico do usuário
+  completionDate DateTime?  // Data de conclusão opcional
+  createdAt    DateTime     @default(now())
+  updatedAt    DateTime     @updatedAt
 }
 
 model UserCourse {
@@ -126,9 +140,11 @@ model UserCourse {
   experience    Float
   createdAt     DateTime        @default(now())
   updatedAt     DateTime        @updatedAt
-  dailyProgress DailyProgress[]
   courseId      Int
   course        Course          @relation(fields: [courseId], references: [id])
+  dailyProgress DailyProgress[]
+  userActivities UserActivity[] // Relação com UserActivity
+  courseLevel   CourseLevel
 }
 
 model DailyProgress {
@@ -184,11 +200,11 @@ enum CourseLevel {
 enum Language {
   Python
   Java
-  CPlusPlus
+  CPlusPlus @map("C++")
   JavaScript
   Ruby
   R
-  CSharp
+  CSharp @map("C#")
   Kotlin
   PHP
   TypeScript
@@ -232,4 +248,10 @@ enum TimeSlot {
   MORNING // 07:00 - 11:00
   AFTERNOON // 12:00 - 18:00
   EVENING // 18:00 - 00:00
+}
+
+enum ActivityType {
+  code_organization
+  multiple_choice
+  code_completion_exercise
 }
