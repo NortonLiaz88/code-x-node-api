@@ -8,6 +8,7 @@ import { AuthModule } from './main/usecases/auth/auth.module';
 import { CoursesModule } from './courses/courses.module';
 import { ActivityModule } from './activity/activity.module';
 import { MongooseModule } from '@nestjs/mongoose';
+import { ProfileModule } from './profile/profile.module';
 
 @Module({
   imports: [
@@ -18,7 +19,7 @@ import { MongooseModule } from '@nestjs/mongoose';
     UserModule, 
     AuthModule, 
     CoursesModule, 
-    ActivityModule
+    ActivityModule, ProfileModule
   ],
   controllers: [AppController],
   providers: [AppService],

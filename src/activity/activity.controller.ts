@@ -14,8 +14,8 @@ import { ActivityService } from './activity.service';
 import { Language } from '@prisma/client';
 
 @ApiBearerAuth()
-@ApiTags('activity')
-@Controller('activity')
+@ApiTags('activities')
+@Controller('activities')
 export class ActivityController {
   constructor(private readonly activityService: ActivityService) {}
 

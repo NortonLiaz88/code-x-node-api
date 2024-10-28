@@ -75,20 +75,22 @@ model Profile {
   anotherDestination        String?
   createdAt                 DateTime    @default(now())
   updatedAt                 DateTime    @updatedAt
+  Progress                  Progress? 
+
 }
 
 model UserPreference {
-  id           Int     @id @default(autoincrement())
-  user         User    @relation(fields: [userId], references: [id])
-  userId       Int     @unique
-  soundEffects Boolean @default(true)
-  vibration    Boolean @default(true)
-  notification Boolean @default(true)
+  id            Int     @id @default(autoincrement())
+  user          User    @relation(fields: [userId], references: [id])
+  userId        Int     @unique
+  soundEffects  Boolean @default(true)
+  vibration     Boolean @default(true)
+  notification  Boolean @default(true)
   chatAnimation Boolean @default(true)
 }
 
 model Progress {
-  id                    Int   @id @default(autoincrement())
+  id                    Int     @id @default(autoincrement())
   consecutiveDays       Int
   exercises             Int
   chat                  Int
@@ -96,55 +98,57 @@ model Progress {
   accumulatedExpirience Float
   done                  Int
   accumulatedTime       Float
+  profileId             Int   @unique
+  profile               Profile @relation(fields: [profileId], references: [id])
 }
 
 model Course {
-  id       Int         @id @default(autoincrement())
-  name     String
-  language Language
-  level    CourseLevel
+  id         Int          @id @default(autoincrement())
+  name       String
+  language   Language
+  level      CourseLevel
   userCourse UserCourse[]
-  activties Activity[]
+  activties  Activity[]
 }
 
 model Activity {
-  id          Int       @id @default(autoincrement())
-  name        String
-  description String
-  level       CourseLevel
-  type        ActivityType @default(code_organization)
-  referenceId String    @unique
-  course      Course    @relation(fields: [courseId], references: [id])
-  courseId    Int
+  id             Int            @id @default(autoincrement())
+  name           String
+  description    String
+  level          CourseLevel
+  type           ActivityType   @default(code_organization)
+  referenceId    String         @unique
+  course         Course         @relation(fields: [courseId], references: [id])
+  courseId       Int
   userActivities UserActivity[] // Relação com UserActivity
 }
 
 // Novo modelo para vincular UserCourse e Activity
 model UserActivity {
-  id           Int          @id @default(autoincrement())
-  userCourse   UserCourse   @relation(fields: [userCourseId], references: [id])
-  userCourseId Int
-  activity     Activity     @relation(fields: [activityId], references: [id])
-  activityId   Int
-  finished     Boolean      @default(false) // Status de finalização específico do usuário
-  completionDate DateTime?  // Data de conclusão opcional
-  createdAt    DateTime     @default(now())
-  updatedAt    DateTime     @updatedAt
+  id             Int        @id @default(autoincrement())
+  userCourse     UserCourse @relation(fields: [userCourseId], references: [id])
+  userCourseId   Int
+  activity       Activity   @relation(fields: [activityId], references: [id])
+  activityId     Int
+  finished       Boolean    @default(false) // Status de finalização específico do usuário
+  completionDate DateTime? // Data de conclusão opcional
+  createdAt      DateTime   @default(now())
+  updatedAt      DateTime   @updatedAt
 }
 
 model UserCourse {
-  id            Int             @id @default(autoincrement())
-  user          User            @relation(fields: [userId], references: [id])
-  userId        Int
-  active        Boolean         @default(true)
-  experience    Float
-  createdAt     DateTime        @default(now())
-  updatedAt     DateTime        @updatedAt
-  courseId      Int
-  course        Course          @relation(fields: [courseId], references: [id])
-  dailyProgress DailyProgress[]
+  id             Int             @id @default(autoincrement())
+  user           User            @relation(fields: [userId], references: [id])
+  userId         Int
+  active         Boolean         @default(true)
+  experience     Float
+  createdAt      DateTime        @default(now())
+  updatedAt      DateTime        @updatedAt
+  courseId       Int
+  course         Course          @relation(fields: [courseId], references: [id])
+  dailyProgress  DailyProgress[]
   userActivities UserActivity[] // Relação com UserActivity
-  courseLevel   CourseLevel
+  courseLevel    CourseLevel
 }
 
 model DailyProgress {
@@ -200,11 +204,11 @@ enum CourseLevel {
 enum Language {
   Python
   Java
-  CPlusPlus @map("C++")
+  CPlusPlus  @map("C++")
   JavaScript
   Ruby
   R
-  CSharp @map("C#")
+  CSharp     @map("C#")
   Kotlin
   PHP
   TypeScript

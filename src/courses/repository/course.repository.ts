@@ -1,11 +1,12 @@
 import { Injectable } from '@nestjs/common';
 import { PrismaClientService } from 'src/infra/orm/prisma/prisma-client.service';
+import { CourseEntity } from '../entities/course.entity';
 
 @Injectable()
 export class CoursesRepository {
   constructor(private readonly prismaService: PrismaClientService) {}
 
-  public async findActiveUserCourses(userId: number) {
+  public async findActiveUserCourses(userId: number): Promise<CourseEntity> {
     // Busca o curso ativo do usuário e o nível do curso
     const user = await this.prismaService.user.findUnique({
       where: {
@@ -32,7 +33,7 @@ export class CoursesRepository {
     const activeCourse = user?.userCourse?.[0]?.course;
 
     if (!activeCourse) {
-      return []; // Caso o usuário não tenha curso ativo
+      return null; // Caso o usuário não tenha curso ativo
     }
 
     const { id: courseId, level } = activeCourse;
@@ -45,7 +46,19 @@ export class CoursesRepository {
       },
       include: {
         activties: true,
-      }
+      },
     });
   }
+
+  public async findUserActivities(userId: number) {
+    const userActivities = await this.prismaService.userActivity.findMany({
+      where: {
+        userCourse: {
+          userId: userId,
+        },
+      }
+    });
+    return userActivities;
+  }
+
 }
