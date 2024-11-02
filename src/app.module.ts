@@ -1,25 +1,38 @@
 import { Module } from '@nestjs/common';
+import { ScheduleModule } from '@nestjs/schedule';
+
 import { AppController } from './app.controller';
 import { AppService } from './app.service';
 import { UserModule } from './main/usecases/user/user.module';
 import { AuthModule } from './main/usecases/auth/auth.module';
 import { ChatModule } from './main/usecases/chat/chat.module';
-import { ConfigModule } from '@nestjs/config';
+import { CoursesModule } from './courses/courses.module';
+import { ActivityModule } from './activity/activity.module';
 import { MongooseModule } from '@nestjs/mongoose';
-import { ScheduleModule } from './main/usecases/schedule/schedule.module';
+import { ProfileModule } from './profile/profile.module';
+import { ConfigModule } from '@nestjs/config';
+import { FileModule } from './files/files.module';
+import { UserActivitiesModule } from './user-activities/user-activities.module';
+import { ProgressModule } from './progress/progress.module';
 
 @Module({
   imports: [
     ConfigModule.forRoot({ isGlobal: true }),
-    MongooseModule.forRoot('mongodb://admin:adminadmin@82.197.92.146:27017', {
-      dbName: 'codex'
+    ScheduleModule.forRoot(),
+    MongooseModule.forRoot(process.env.MONGO_URL, {
+      dbName: 'db',
     }),
-    UserModule,
-    AuthModule,
+    UserModule, 
+    AuthModule, 
     ChatModule,
-    ScheduleModule,
+    CoursesModule, 
+    ActivityModule, 
+    ProfileModule,
+    FileModule,
+    UserActivitiesModule,
+    ProgressModule,
   ],
-  controllers: [],
+  controllers: [AppController],
   providers: [AppService],
 })
 export class AppModule {}

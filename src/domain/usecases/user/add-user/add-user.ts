@@ -1,8 +1,8 @@
-import { DayOfWeek, Destination, Interest, Knowledge, Language, TimeSlot } from '@prisma/client';
+import { CourseLevel, DayOfWeek, Destination, Interest, Language, TimeSlot } from '@prisma/client';
 import { GetUserModel, UserModel } from 'src/domain/models/user';
 
 export interface UserCreationProfile {
-  knowledge: Knowledge;
+  knowledge: CourseLevel;
   programmingLanguage: Language;
   interests: Interest;
   destination: Destination;
