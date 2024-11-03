@@ -1,11 +1,12 @@
 import { Injectable } from '@nestjs/common';
 import { PrismaClientService } from 'src/infra/orm/prisma/prisma-client.service';
+import { UpdateScheduleFormDTO } from './dto/update-schedule.dto';
 
 @Injectable()
 export class ProfileService {
   constructor(private readonly prismaService: PrismaClientService) {}
 
-  async getProfile(id: number) {
+  public async getProfile(id: number) {
     const user = await this.prismaService.user.findUnique({
       where: {
         id: id,
@@ -36,11 +37,36 @@ export class ProfileService {
       },
     });
 
-    const schedule = await this.prismaService.schedule.findMany({
+    const schedule = await this.prismaService.schedule.findFirst({
       where: {
         user: {
           id: userId,
         },
+      },
+      orderBy: {
+        id: 'desc',
+      }
+    });
+
+    return schedule;
+  }
+
+  public async updateUserSchedule(scheduleId: number, data: UpdateScheduleFormDTO) {
+    const schedule = await this.prismaService.schedule.update({
+      where: {
+        id: +scheduleId,
+      },
+      data: {
+        name: data.name,
+        icon: data.icon,
+        color: data.color,
+        goalCount: +data.goalCount,
+        goalFrequency: +data.goalFrequency,
+        days: {
+          set: data.days,
+        },
+        timeSlot: data.timeSlot,
+        remind: data.remind,
       },
     });
 
