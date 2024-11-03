@@ -6,7 +6,8 @@ export class RemoteSendMessage implements SendMessage {
         private readonly sendMessageRemote: SendMessageRepository
     ) {}
 
-    async sendMessage(profileId: number, chatId: string, message: string): Promise<void> {
-        await this.sendMessageRemote.sendMessage(profileId, chatId, message);
+    async sendMessage(profileId: number, chatId: string, message: string): Promise<any> {
+        const response = await this.sendMessageRemote.sendMessage(profileId, chatId, message);
+        return response
     }
 }

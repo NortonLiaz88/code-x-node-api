@@ -17,4 +17,10 @@ export class ProfileController {
   }
 
 
+  @Get('/schedule')
+  async findActiveUserSchedule(
+    @CurrentUser() user: any
+  ) {
+    return await this.profileService.getUserSchedule(user.payload.id);
+  }
 }

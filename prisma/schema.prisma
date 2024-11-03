@@ -130,6 +130,7 @@ model UserActivity {
   activity       Activity   @relation(fields: [activityId], references: [id])
   activityId     Int
   finished       Boolean    @default(false) // Status de finalização específico do usuário
+  correct        Boolean
   completionDate DateTime? // Data de conclusão opcional
   createdAt      DateTime   @default(now())
   updatedAt      DateTime   @updatedAt
