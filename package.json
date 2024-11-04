@@ -23,7 +23,9 @@
     "seed:users": "ts-node ./prisma/seed/user.seed.ts",
     "seed:profile": "ts-node ./prisma/seed/profile.seed.ts",
     "seed:course": "ts-node ./prisma/seed/course.seed.ts",
-    "seed:schedule": "ts-node ./prisma/seed/schedule.seed.ts"
+    "seed:schedule": "ts-node ./prisma/seed/schedule.seed.ts",
+    "seed:password": "ts-node ./prisma/seed/password.ts",
+    "seed:store": "ts-node ./prisma/seed/store.seed.ts"
   },
   "dependencies": {
     "@nestjs/axios": "^3.0.2",

@@ -24,9 +24,10 @@ async function seedAdmin() {
       email: 'admin@example.com',
       password: hashedPassword,
       username: 'admin',
-      name: 'Admin',
-      lastName: 'User',
-      phoneNumber: '+1234567890',
+      
+      // name: 'Admin',
+      // lastName: 'User',
+      // phoneNumber: '+1234567890',
       diamonds: 999999, // Valor desejado para diamonds
       experience: 99999, // Valor desejado para experience
       createdAt: new Date(),

@@ -1,10 +1,11 @@
 import { Injectable } from '@nestjs/common';
 import { PrismaClientService } from 'src/infra/orm/prisma/prisma-client.service';
 import { UpdateScheduleFormDTO } from './dto/update-schedule.dto';
-
+import { UpdateAccountDTO } from './dto/update-account.dto';
+import * as bcrypt from 'bcrypt';
 @Injectable()
 export class ProfileService {
-  constructor(private readonly prismaService: PrismaClientService) {}
+  constructor(private readonly prismaService: PrismaClientService,) {}
 
   public async getProfile(id: number) {
     const user = await this.prismaService.user.findUnique({
@@ -13,6 +14,7 @@ export class ProfileService {
       },
       include: {
         profile: true,
+        userPreference: true,
       },
     });
 
@@ -71,5 +73,29 @@ export class ProfileService {
     });
 
     return schedule;
+  }
+
+
+  public async updateUserAccount(userId: number, data: UpdateAccountDTO) {
+    
+    const hashedPassword = await bcrypt.hash(data.password, 10);
+    const user = await this.prismaService.user.update({
+      where: {
+        id: userId,
+      },
+      data: {
+        username: data.username,
+        email: data.email,
+        password: hashedPassword,
+        userPreference: {
+          update: {
+            soundEffects: data.soundEffects,
+            vibration: data.hapticFeedback,
+            notification: data.notifications,
+            chatAnimation: data.animations,
+          },
+        }
+      },
+    });
   }
 }

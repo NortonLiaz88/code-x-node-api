@@ -125,10 +125,10 @@ export class UserPostgresRepository
     const newUser = await this.ormService.user.create({
       data: {
         email: user.email,
-        name: user.name,
-        lastName: user.lastName,
         password: user.password,
-        phoneNumber: user.phoneNumber,
+        // name: user.name,
+        // lastName: user.lastName,
+        // phoneNumber: user.phoneNumber,
         username: user.username,
         schedule: {
           create: {
@@ -162,10 +162,18 @@ export class UserPostgresRepository
             active: true,
             createdAt: new Date(),
             updatedAt: new Date(),
-            courseLevel: CourseLevel.beginner,
+            courseLevel: user.profile.knowledge,
   
           },
-        }
+        },
+        userPreference: {
+          create: {
+            chatAnimation: true,
+            notification: true,
+            soundEffects: true,
+            vibration: true,
+          }
+        },
       },
     });
 

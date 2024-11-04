@@ -22,11 +22,11 @@ export interface UserCreationSchedule {
 }
 
 export interface AddUserModel {
-  name: string;
-  lastName: string;
+  // name: string;
+  // lastName: string;
   password: string;
   username: string;
-  phoneNumber: string;
+  // phoneNumber: string;
   email: string;
   profile: UserCreationProfile;
   schedule: UserCreationSchedule;
