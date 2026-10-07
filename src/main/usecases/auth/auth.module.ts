@@ -11,6 +11,7 @@ import { UserModule } from '../user/user.module';
 import { makeDbAuthentication } from 'src/main/factory/auth/db-auth';
 import { makeDbRefreshToken } from 'src/main/factory/auth/db-refresh-token';
 import { makeDbAddUser } from 'src/main/factory/db-add-user';
+import { EncrypterAdapter } from 'src/infra/cryptography/encrypter';
 
 @Module({
   imports: [
@@ -32,12 +33,13 @@ import { makeDbAddUser } from 'src/main/factory/db-add-user';
         const dbRefreshToken = makeDbRefreshToken();
         const jwtService = new JwtService();
         const tokenDecoder = new TokenDecoderAdapter(jwtService);
-
+        const encrypter = new EncrypterAdapter(10);
         return new AuthService(
           dbAuthentication,
           dbAddAccount,
           dbRefreshToken,
           tokenDecoder,
+          encrypter,
         );
       },
     },

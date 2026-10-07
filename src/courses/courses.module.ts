@@ -8,5 +8,6 @@ import { PrismaModule } from 'src/infra/orm/prisma/prisma.module';
   imports: [PrismaModule],
   controllers: [CoursesController],
   providers: [CoursesService, CoursesRepository],
+  exports: [CoursesService, CoursesRepository],
 })
 export class CoursesModule {}

@@ -1,4 +1,4 @@
-import { CourseLevel, Destination, Interest, Language } from '@prisma/client';
+import { CourseLevel, DayOfWeek, Destination, Interest, Language, TimeSlot } from '@prisma/client';
 import { GetUserModel, UserModel } from 'src/domain/models/user';
 
 export interface UserCreationProfile {
@@ -10,14 +10,26 @@ export interface UserCreationProfile {
   anotherDestination?: string;
 }
 
-export interface AddUserModel {
+export interface UserCreationSchedule {
   name: string;
-  lastName: string;
+  icon: string;
+  color: string;
+  goalCount: number;
+  goalFrequency: number;
+  days: DayOfWeek[];
+  timeSlot: TimeSlot;
+  remind: boolean;
+}
+
+export interface AddUserModel {
+  // name: string;
+  // lastName: string;
   password: string;
   username: string;
-  phoneNumber: string;
+  // phoneNumber: string;
   email: string;
   profile: UserCreationProfile;
+  schedule: UserCreationSchedule;
 }
 
 export interface AddUser {

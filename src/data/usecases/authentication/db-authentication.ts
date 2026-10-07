@@ -30,13 +30,14 @@ export class DbAuthentication implements Authentication {
 
       console.log('isValid', account.password, authentication.password, isValid);
 
-      const { id, name, lastName, email } = account;
+      const { id, name, lastName, email, profile } = account;
       if (isValid) {
         const accessToken = await this.tokenGenerator.generate({
           id,
           name,
           lastName,
           email,
+          profile,
         });
         return accessToken;
       }

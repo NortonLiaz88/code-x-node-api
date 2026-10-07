@@ -8,6 +8,7 @@ export interface JwtTokenContent {
     id: number;
     name: string;
     email: string;
+    profile: any;
   };
   iat: string;
 }

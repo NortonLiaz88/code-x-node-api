@@ -24,6 +24,7 @@ export class CoursesRepository {
                 level: true, // Obtém o nível do curso
               },
             },
+            userActivities: true,
           },
         },
       },

@@ -32,5 +32,6 @@ import { ActivityService } from './activity.service';
     ActivityController,
   ],
   providers: [CronActivityService, ActivityService],
+  exports: [ActivityService],
 })
 export class ActivityModule {}

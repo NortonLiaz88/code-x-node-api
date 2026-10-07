@@ -9,14 +9,14 @@ export const Public = () => SetMetadata(IS_PUBLIC_KEY, true);
 
 @ApiExtraModels(LoginResponseDto, UnauthorizedException)
 @ApiTags('auth')
-@Controller('users')
+@Controller('auth')
 export class CreateUserController {
     constructor(private readonly userService: UserService) {}
 
     @Public()
-    @Post()
+    @Post('register')
     @HttpCode(200)
-    async handle (@Body() addUserDto: AddUserDto) {
+    async handle (@Body() addUserDto: any) {
         try {
             const user = await this.userService.createUser(addUserDto);
             return user;

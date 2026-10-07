@@ -125,11 +125,23 @@ export class UserPostgresRepository
     const newUser = await this.ormService.user.create({
       data: {
         email: user.email,
-        name: user.name,
-        lastName: user.lastName,
         password: user.password,
-        phoneNumber: user.phoneNumber,
+        // name: user.name,
+        // lastName: user.lastName,
+        // phoneNumber: user.phoneNumber,
         username: user.username,
+        schedule: {
+          create: {
+            name: user.schedule.name,
+            icon: user.schedule.icon,
+            color: user.schedule.color,
+            goalCount: +user.schedule.goalCount,
+            goalFrequency: +user.schedule.goalFrequency,
+            days: user.schedule.days,
+            timeSlot: user.schedule.timeSlot,
+            remind: user.schedule.remind,
+          },
+        },
         profile: {
           create: {
             activeProgrammingLanguage: user.profile.programmingLanguage,
@@ -150,10 +162,18 @@ export class UserPostgresRepository
             active: true,
             createdAt: new Date(),
             updatedAt: new Date(),
-            courseLevel: CourseLevel.beginner,
+            courseLevel: user.profile.knowledge,
   
           },
-        }
+        },
+        userPreference: {
+          create: {
+            chatAnimation: true,
+            notification: true,
+            soundEffects: true,
+            vibration: true,
+          }
+        },
       },
     });
 
@@ -166,6 +186,9 @@ export class UserPostgresRepository
       where: {
         email: email,
       },
+      include: {
+        profile: true,
+      },
     });
    
     return user;
@@ -175,6 +198,9 @@ export class UserPostgresRepository
     const user = await this.ormService.user.findFirst({
       where: {
         username: username,
+      },
+      include: {
+        profile: true,
       },
     });
 
