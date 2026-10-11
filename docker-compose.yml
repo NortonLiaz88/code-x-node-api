@@ -83,11 +83,15 @@ services:
     environment:
       MONGO_URL: mongodb://mongo:27017
       OLLAMA_URL: http://ollama:11434
+      LLM_PROVIDER: ${LLM_PROVIDER:-ollama}
+      LLM_MODEL: ${LLM_MODEL:-qwen2.5:7b}
     ports:
       - '127.0.0.1:8001:80'
     depends_on:
       mongo:
         condition: service_healthy
+      ollama-pull:
+        condition: service_completed_successfully
 
   # Local model server for the MVP. Needs the NVIDIA Container Toolkit; on
   # a machine without an NVIDIA GPU, delete the deploy block to run on CPU.
@@ -97,6 +101,10 @@ services:
       - ollama-data:/root/.ollama
     ports:
       - '127.0.0.1:11434:11434'
+    healthcheck:
+      test: ['CMD', 'ollama', 'list']
+      interval: 5s
+      retries: 20
     deploy:
       resources:
         reservations:
@@ -104,6 +112,20 @@ services:
             - driver: nvidia
               count: all
               capabilities: [gpu]
+
+  # Pulls the tutor's model into Ollama on first start (about 5 GB for
+  # qwen2.5:7b), then exits. Later starts find it in the volume and finish fast.
+  ollama-pull:
+    image: ollama/ollama:0.12.3
+    environment:
+      OLLAMA_HOST: http://ollama:11434
+      LLM_PROVIDER: ${LLM_PROVIDER:-ollama}
+      LLM_MODEL: ${LLM_MODEL:-qwen2.5:7b}
+    entrypoint: ['sh', '-c']
+    command: ['[ "$$LLM_PROVIDER" != ollama ] || ollama pull "$$LLM_MODEL"']
+    depends_on:
+      ollama:
+        condition: service_healthy
 
 volumes:
   postgres-data:
