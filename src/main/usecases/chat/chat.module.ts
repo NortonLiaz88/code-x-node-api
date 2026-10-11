@@ -1,8 +1,13 @@
-import { Module, Session } from '@nestjs/common';
+import { Module } from '@nestjs/common';
 import { MongooseModule, getModelToken } from '@nestjs/mongoose';
 import { Model } from 'mongoose';
 
-import { SessionDocument, SessionSchema } from 'src/infra/mongodb/chat/model';
+import {
+  Session,
+  SessionDocument,
+  SessionSchema,
+  TUTOR_SESSIONS_CONNECTION,
+} from 'src/infra/mongodb/chat/model';
 import { makeDbStartSession } from 'src/main/factory/chat/db-start-session';
 import { StartSessionController } from 'src/presentation/controllers/chat/start-session/start-session.controller';
 import { ChatService } from 'src/service/chat/chat.service';
@@ -13,7 +18,10 @@ import { SendMessageController } from 'src/presentation/controllers/chat/send-me
 @Module({
   controllers: [StartSessionController, SendMessageController],
   imports: [
-    MongooseModule.forFeature([{ name: Session.name, schema: SessionSchema }]),
+    MongooseModule.forFeature(
+      [{ name: Session.name, schema: SessionSchema }],
+      TUTOR_SESSIONS_CONNECTION,
+    ),
     AuthModule,
   ],
   providers: [
@@ -24,7 +32,7 @@ import { SendMessageController } from 'src/presentation/controllers/chat/send-me
         const httpChat = makeHttpSendMessage();
         return new ChatService(sessionModel, dbStartSession, httpChat);
       },
-      inject: [getModelToken(Session.name)],
+      inject: [getModelToken(Session.name, TUTOR_SESSIONS_CONNECTION)],
     },
   ],
 })

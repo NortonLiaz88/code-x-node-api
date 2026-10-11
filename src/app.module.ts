@@ -15,13 +15,23 @@ import { FileModule } from './files/files.module';
 import { UserActivitiesModule } from './user-activities/user-activities.module';
 import { ProgressModule } from './progress/progress.module';
 import { PurchasesModule } from './purchases/purchases.module';
+import {
+  TUTOR_SESSIONS_CONNECTION,
+  tutorSessionsDbName,
+} from './infra/mongodb/chat/model';
 
 @Module({
   imports: [
     ConfigModule.forRoot({ isGlobal: true }),
     ScheduleModule.forRoot(),
+    // Lesson templates.
     MongooseModule.forRoot(process.env.MONGO_URL, {
       dbName: 'db',
+    }),
+    // Tutor chat sessions, shared with code-x-ai.
+    MongooseModule.forRoot(process.env.MONGO_URL, {
+      connectionName: TUTOR_SESSIONS_CONNECTION,
+      dbName: tutorSessionsDbName(),
     }),
     UserModule,
     AuthModule,
