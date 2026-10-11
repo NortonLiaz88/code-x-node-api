@@ -20,15 +20,15 @@
     "test:e2e": "jest --config ./test/jest-e2e.json",
     "migrate": "npx prisma migrate dev --name init",
     "migrate:reset": "dotenv -e .env.dev -- npx prisma migrate reset",
-    "seed:users": "ts-node ./prisma/seed/user.seed.ts",
-    "seed:profile": "ts-node ./prisma/seed/profile.seed.ts",
-    "seed:course": "ts-node ./prisma/seed/course.seed.ts",
-    "seed:schedule": "ts-node ./prisma/seed/schedule.seed.ts",
-    "seed:password": "ts-node ./prisma/seed/password.ts",
-    "seed:store": "ts-node ./prisma/seed/store.seed.ts",
+    "seed:users": "ts-node -r dotenv/config ./prisma/seed/user.seed.ts",
+    "seed:profile": "ts-node -r dotenv/config ./prisma/seed/profile.seed.ts",
+    "seed:course": "ts-node -r dotenv/config ./prisma/seed/course.seed.ts",
+    "seed:schedule": "ts-node -r dotenv/config ./prisma/seed/schedule.seed.ts",
+    "seed:password": "ts-node -r dotenv/config ./prisma/seed/password.ts",
+    "seed:store": "ts-node -r dotenv/config ./prisma/seed/store.seed.ts",
     "lint:check": "eslint \"{src,apps,libs,test}/**/*.ts\"",
-    "admin:grant": "ts-node ./prisma/scripts/grant-admin.ts",
-    "seed": "ts-node ./prisma/seed/dev.seed.ts"
+    "admin:grant": "ts-node -r dotenv/config ./prisma/scripts/grant-admin.ts",
+    "seed": "ts-node -r dotenv/config ./prisma/seed/dev.seed.ts"
   },
   "dependencies": {
     "@nestjs/axios": "^3.0.2",
@@ -67,6 +67,7 @@
     "@types/supertest": "^2.0.12",
     "@typescript-eslint/eslint-plugin": "^6.0.0",
     "@typescript-eslint/parser": "^6.0.0",
+    "dotenv": "16.4.5",
     "eslint": "^8.42.0",
     "eslint-config-prettier": "^9.0.0",
     "eslint-plugin-prettier": "^5.0.0",
@@ -101,6 +102,6 @@
     }
   },
   "prisma": {
-    "seed": "ts-node ./prisma/seed/dev.seed.ts"
+    "seed": "ts-node -r dotenv/config ./prisma/seed/dev.seed.ts"
   }
 }
