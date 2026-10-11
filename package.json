@@ -25,7 +25,8 @@
     "seed:course": "ts-node ./prisma/seed/course.seed.ts",
     "seed:schedule": "ts-node ./prisma/seed/schedule.seed.ts",
     "seed:password": "ts-node ./prisma/seed/password.ts",
-    "seed:store": "ts-node ./prisma/seed/store.seed.ts"
+    "seed:store": "ts-node ./prisma/seed/store.seed.ts",
+    "lint:check": "eslint \"{src,apps,libs,test}/**/*.ts\""
   },
   "dependencies": {
     "@nestjs/axios": "^3.0.2",
@@ -92,6 +93,9 @@
       "**/*.(t|j)s"
     ],
     "coverageDirectory": "../coverage",
-    "testEnvironment": "node"
+    "testEnvironment": "node",
+    "moduleNameMapper": {
+      "^src/(.*)$": "<rootDir>/$1"
+    }
   }
 }
