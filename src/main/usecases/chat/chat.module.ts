@@ -16,12 +16,14 @@ import { makeHttpSendMessage } from 'src/main/factory/chat/htt-send-message';
 import { ChatHistoryController } from 'src/presentation/controllers/chat/history/chat-history.controller';
 import { ChatPostgresRepository } from 'src/infra/postgresql/chat.repository';
 import { PrismaClientService } from 'src/infra/orm/prisma/prisma-client.service';
+import { SendMessageStreamController } from 'src/presentation/controllers/chat/send-message-stream/send-message-stream.controller';
 import { SendMessageController } from 'src/presentation/controllers/chat/send-message/send-message.controller';
 
 @Module({
   controllers: [
     StartSessionController,
     SendMessageController,
+    SendMessageStreamController,
     ChatHistoryController,
   ],
   imports: [

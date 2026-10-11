@@ -9,6 +9,15 @@ export interface TutorReply {
   topic?: string | null;
 }
 
+/** What the app receives on POST /chat/send-message/stream. */
+export type ChatStreamEvent =
+  | { event: 'delta'; data: { text: string } }
+  | { event: 'done'; data: ChatReplyDto }
+  | { event: 'error'; data: { message: string } };
+
+export const STREAM_ERROR_MESSAGE =
+  'Não consegui gerar uma resposta agora. Tente de novo.';
+
 export class ChatReplyDto {
   @ApiProperty({ description: "The tutor's answer" })
   answer: string;

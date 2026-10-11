@@ -6,4 +6,15 @@ export class SendMessageRepository {
     referenceId: string,
     message: string,
   ) => Promise<TutorReply>;
+
+  streamMessage: (
+    referenceId: string,
+    message: string,
+    signal?: AbortSignal,
+  ) => AsyncGenerator<TutorStreamEvent>;
 }
+
+export type TutorStreamEvent =
+  | { type: 'delta'; text: string }
+  | { type: 'done'; reply: TutorReply }
+  | { type: 'error' };
