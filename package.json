@@ -27,7 +27,8 @@
     "seed:password": "ts-node ./prisma/seed/password.ts",
     "seed:store": "ts-node ./prisma/seed/store.seed.ts",
     "lint:check": "eslint \"{src,apps,libs,test}/**/*.ts\"",
-    "admin:grant": "ts-node ./prisma/scripts/grant-admin.ts"
+    "admin:grant": "ts-node ./prisma/scripts/grant-admin.ts",
+    "seed": "ts-node ./prisma/seed/dev.seed.ts"
   },
   "dependencies": {
     "@nestjs/axios": "^3.0.2",
@@ -98,5 +99,8 @@
     "moduleNameMapper": {
       "^src/(.*)$": "<rootDir>/$1"
     }
+  },
+  "prisma": {
+    "seed": "ts-node ./prisma/seed/dev.seed.ts"
   }
 }
