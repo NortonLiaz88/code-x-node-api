@@ -26,7 +26,8 @@
     "seed:schedule": "ts-node ./prisma/seed/schedule.seed.ts",
     "seed:password": "ts-node ./prisma/seed/password.ts",
     "seed:store": "ts-node ./prisma/seed/store.seed.ts",
-    "lint:check": "eslint \"{src,apps,libs,test}/**/*.ts\""
+    "lint:check": "eslint \"{src,apps,libs,test}/**/*.ts\"",
+    "admin:grant": "ts-node ./prisma/scripts/grant-admin.ts"
   },
   "dependencies": {
     "@nestjs/axios": "^3.0.2",
