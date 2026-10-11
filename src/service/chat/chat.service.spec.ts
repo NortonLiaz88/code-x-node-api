@@ -17,6 +17,13 @@ const makeService = (sessionDoc: unknown = null) => {
     }),
   };
   const httpSendMessage = {
+    streamMessage: jest.fn(async function* () {
+      yield { event: 'delta', data: { text: 'Um laço. ' } };
+      yield {
+        event: 'done',
+        data: { answer: 'Um laço.', quickReplies: [], topic: 'Laços' },
+      };
+    }),
     sendMessage: jest.fn().mockResolvedValue({
       answer: 'Um laço repete.',
       quickReplies: ['Ver exemplo'],
@@ -116,5 +123,31 @@ describe('ChatService', () => {
       service.getMessages(2, chat.referenceId),
     ).rejects.toBeInstanceOf(NotFoundException);
     expect(sessionModel.findOne).not.toHaveBeenCalled();
+  });
+
+  it('streams the reply and records the message once it is done', async () => {
+    const { service, chatRepository } = makeService();
+
+    const events = [];
+    for await (const event of await service.streamMessage(
+      1,
+      chat.referenceId,
+      'Oi',
+    )) {
+      events.push(event.event);
+    }
+
+    expect(events).toEqual(['delta', 'done']);
+    expect(chatRepository.recordMessage).toHaveBeenCalledWith(chat, 'Laços');
+  });
+
+  it("refuses to stream someone else's conversation before it starts", async () => {
+    const { service, httpSendMessage, chatRepository } = makeService();
+    chatRepository.getChatByReference.mockResolvedValue(null);
+
+    await expect(
+      service.streamMessage(2, chat.referenceId, 'Oi'),
+    ).rejects.toBeInstanceOf(NotFoundException);
+    expect(httpSendMessage.streamMessage).not.toHaveBeenCalled();
   });
 });

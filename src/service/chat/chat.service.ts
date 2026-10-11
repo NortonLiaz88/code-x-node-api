@@ -10,6 +10,7 @@ import { RemoteSendMessage } from 'src/data/usecases/chat/http-send-mesage';
 import { InjectModel } from '@nestjs/mongoose';
 import {
   ChatReplyDto,
+  ChatStreamEvent,
   MAX_QUICK_REPLIES,
 } from 'src/main/dto/chat/chat-reply/chat-reply.dto';
 import { ChatPostgresRepository } from 'src/infra/postgresql/chat.repository';
@@ -49,6 +50,34 @@ export class ChatService {
     );
     await this.chatRepository.recordMessage(chat, reply.topic);
     return reply;
+  }
+
+  /**
+   * Checks the chat belongs to the caller before anything is streamed, then
+   * relays the tutor's events and records the message once it is done.
+   */
+  async streamMessage(
+    profileId: number,
+    referenceId: string,
+    message: string,
+    signal?: AbortSignal,
+  ): Promise<AsyncGenerator<ChatStreamEvent>> {
+    const chat = await this.getOwnChat(profileId, referenceId);
+    const events = this.httpSendMessage.streamMessage(
+      referenceId,
+      message,
+      signal,
+    );
+    const chatRepository = this.chatRepository;
+
+    return (async function* () {
+      for await (const item of events) {
+        if (item.event === 'done') {
+          await chatRepository.recordMessage(chat, item.data.topic);
+        }
+        yield item;
+      }
+    })();
   }
 
   async getConversations(profileId: number): Promise<ChatConversationDto[]> {
