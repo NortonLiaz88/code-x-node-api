@@ -107,28 +107,30 @@ export class PurchasesService {
     };
   }
 
+  // TODO(#5): filter purchases by userId.
+  // eslint-disable-next-line @typescript-eslint/no-unused-vars
   public async findMyAssets(userId: number) {
-    let fonts = await this.prismaService.purchase.findMany({
+    const fonts = await this.prismaService.purchase.findMany({
       where: {
         item: {
           type: ItemType.FONT,
-        }
+        },
       },
     });
 
-    let sounds = await this.prismaService.purchase.findMany({
+    const sounds = await this.prismaService.purchase.findMany({
       where: {
         item: {
           type: ItemType.SOUND_EFFECT,
-        }
+        },
       },
     });
 
-    let background = await this.prismaService.purchase.findMany({
+    const background = await this.prismaService.purchase.findMany({
       where: {
         item: {
           type: ItemType.WALLPAPER,
-        }
+        },
       },
     });
 
@@ -143,7 +145,7 @@ export class PurchasesService {
     return `This action returns a #${id} purchase`;
   }
 
-  update(id: number, updatePurchaseDto: UpdatePurchaseDto) {
+  update(id: number, _updatePurchaseDto: UpdatePurchaseDto) {
     return `This action updates a #${id} purchase`;
   }
 

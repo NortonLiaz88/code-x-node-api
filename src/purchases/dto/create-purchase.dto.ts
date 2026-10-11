@@ -1,3 +1,3 @@
 export class CreatePurchaseDto {
-    itemId: number;
+  itemId: number;
 }

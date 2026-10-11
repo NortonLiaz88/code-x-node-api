@@ -25,4 +25,4 @@ export interface UserModel {
   updatedAt: Date;
 }
 
-export type GetUserModel =  UserModel;
+export type GetUserModel = UserModel;

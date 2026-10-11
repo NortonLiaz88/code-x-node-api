@@ -25,8 +25,8 @@ export class UpdateScheduleController {
     await this.scheduleService.update(userData.id, schedule);
 
     return {
-        ...schedule,
-        userId: userData.id,
-    }
+      ...schedule,
+      userId: userData.id,
+    };
   }
 }

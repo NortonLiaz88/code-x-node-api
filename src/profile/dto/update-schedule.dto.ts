@@ -1,6 +1,6 @@
 import { ApiProperty } from '@nestjs/swagger';
 import { DayOfWeek, TimeSlot } from '@prisma/client';
-import { IsBoolean, IsEnum, IsNumberString, IsString } from 'class-validator';
+import { IsString } from 'class-validator';
 
 export class UpdateScheduleFormDTO {
   @ApiProperty()

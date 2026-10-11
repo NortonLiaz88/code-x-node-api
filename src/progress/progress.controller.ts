@@ -46,7 +46,7 @@ export class ProgressController {
   }
 
   @Patch(':id')
-  update(@Param('id') id: string, @Body() updateProgressDto: any) {
+  update(@Param('id') id: string, @Body() _updateProgressDto: any) {
     return this.progressService.update(+id);
   }
 

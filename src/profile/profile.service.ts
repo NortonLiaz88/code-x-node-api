@@ -5,7 +5,7 @@ import { UpdateAccountDTO } from './dto/update-account.dto';
 import * as bcrypt from 'bcrypt';
 @Injectable()
 export class ProfileService {
-  constructor(private readonly prismaService: PrismaClientService,) {}
+  constructor(private readonly prismaService: PrismaClientService) {}
 
   public async getProfile(id: number) {
     const user = await this.prismaService.user.findUnique({
@@ -30,15 +30,6 @@ export class ProfileService {
   }
 
   public async getUserSchedule(userId: number) {
-    const user = await this.prismaService.user.findUnique({
-      where: {
-        id: userId,
-      },
-      include: {
-        profile: true,
-      },
-    });
-
     const schedule = await this.prismaService.schedule.findFirst({
       where: {
         user: {
@@ -47,13 +38,16 @@ export class ProfileService {
       },
       orderBy: {
         id: 'desc',
-      }
+      },
     });
 
     return schedule;
   }
 
-  public async updateUserSchedule(scheduleId: number, data: UpdateScheduleFormDTO) {
+  public async updateUserSchedule(
+    scheduleId: number,
+    data: UpdateScheduleFormDTO,
+  ) {
     const schedule = await this.prismaService.schedule.update({
       where: {
         id: +scheduleId,
@@ -75,11 +69,9 @@ export class ProfileService {
     return schedule;
   }
 
-
   public async updateUserAccount(userId: number, data: UpdateAccountDTO) {
-    
     const hashedPassword = await bcrypt.hash(data.password, 10);
-    const user = await this.prismaService.user.update({
+    await this.prismaService.user.update({
       where: {
         id: userId,
       },
@@ -94,7 +86,7 @@ export class ProfileService {
             notification: data.notifications,
             chatAnimation: data.animations,
           },
-        }
+        },
       },
     });
   }

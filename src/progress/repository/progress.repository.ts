@@ -56,10 +56,8 @@ export class ProgressRepository {
       accumulatedDiamonds: 10,
       accumulatedExpirience: 20,
       accumulatedTime: 120,
-      consecutiveDays: isConsecutive
-        ? profile.Progress.consecutiveDays + 1
-        : 1,
-    }
+      consecutiveDays: isConsecutive ? profile.Progress.consecutiveDays + 1 : 1,
+    };
     // Implementação do método
   }
 
@@ -112,12 +110,12 @@ export class ProgressRepository {
         },
         createdAt: {
           gte: new Date(new Date().getFullYear(), month - 1, 1),
-          lt: new Date(new Date().getFullYear(), month, 1)
-        }
+          lt: new Date(new Date().getFullYear(), month, 1),
+        },
       },
       select: {
         createdAt: true,
-      }
+      },
     });
 
     const activityDays = await this.prismaService.userActivity.findMany({
@@ -127,17 +125,17 @@ export class ProgressRepository {
         },
         createdAt: {
           gte: new Date(new Date().getFullYear(), month - 1, 1),
-          lt: new Date(new Date().getFullYear(), month, 1)
-        }
+          lt: new Date(new Date().getFullYear(), month, 1),
+        },
       },
       select: {
         createdAt: true,
-      }
+      },
     });
 
     const daysSet = new Set<string>();
 
-    chatDays.concat(activityDays).forEach(record => {
+    chatDays.concat(activityDays).forEach((record) => {
       const day = record.createdAt.toISOString().split('T')[0]; // Extract YYYY-MM-DD
       daysSet.add(day);
     });
@@ -150,12 +148,12 @@ export class ProgressRepository {
       where: {
         user: {
           id: userId,
-        }
+        },
       },
       select: {
         timeSlot: true,
-      }
-    })
+      },
+    });
 
     return timeSlot;
   }

@@ -2,7 +2,6 @@ import { Injectable } from '@nestjs/common';
 import { RegistertUserActivityDto } from './dto/update-user-activity.dto';
 import { UserActivitiesRepository } from './repository/user-activities.repository';
 import { ActivityService } from 'src/activity/activity.service';
-import { CurrentUser } from 'src/main/decorators/current-user.decorator';
 import { ProgressService } from 'src/progress/progress.service';
 
 @Injectable()
@@ -41,7 +40,7 @@ export class UserActivitiesService {
       ...userActivity,
       correct: response === activityData.answer,
       correctAnswer: activityData.answer,
-      progress
+      progress,
     };
   }
 
@@ -64,7 +63,7 @@ export class UserActivitiesService {
       response === activityData.answer,
     );
 
-    const progress = await this.progressService.update(userPayload.id);
+    await this.progressService.update(userPayload.id);
     return {
       ...userActivity,
       correct: response === activityData.answer,

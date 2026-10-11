@@ -1,5 +1,12 @@
-import { CourseLevel, DayOfWeek, Destination, Interest, Language, TimeSlot } from '@prisma/client';
-import { GetUserModel, UserModel } from 'src/domain/models/user';
+import {
+  CourseLevel,
+  DayOfWeek,
+  Destination,
+  Interest,
+  Language,
+  TimeSlot,
+} from '@prisma/client';
+import { GetUserModel } from 'src/domain/models/user';
 
 export interface UserCreationProfile {
   knowledge: CourseLevel;

@@ -1,4 +1,10 @@
-import { Controller, Post, HttpCode, Headers, HttpException } from '@nestjs/common';
+import {
+  Controller,
+  Post,
+  HttpCode,
+  Headers,
+  HttpException,
+} from '@nestjs/common';
 import { ApiBearerAuth, ApiResponse, ApiTags } from '@nestjs/swagger';
 import { ChatSessionResponseDto } from 'src/main/dto/chat/start-session/start-session.dto';
 import { AuthService } from 'src/main/usecases/auth/auth.service';
@@ -23,7 +29,7 @@ export class StartSessionController {
       const userData = (await this.authService.getUserByToken(token)).payload;
 
       const response = await this.chatService.startSession(userData.profile.id);
-      
+
       return response;
     } catch (err) {
       if (err instanceof HttpException) {

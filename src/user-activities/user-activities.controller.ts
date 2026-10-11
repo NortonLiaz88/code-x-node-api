@@ -8,7 +8,10 @@ import {
   Delete,
 } from '@nestjs/common';
 import { UserActivitiesService } from './user-activities.service';
-import { RegistertUserActivityDto, UserActivityResponseDto } from './dto/update-user-activity.dto';
+import {
+  RegistertUserActivityDto,
+  UserActivityResponseDto,
+} from './dto/update-user-activity.dto';
 import { CurrentUser } from 'src/main/decorators/current-user.decorator';
 import { ApiBearerAuth, ApiTags } from '@nestjs/swagger';
 

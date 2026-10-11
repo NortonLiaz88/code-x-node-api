@@ -10,6 +10,6 @@ import { ProgressRepository } from './repository/progress.repository';
   controllers: [ProgressController],
   providers: [ProgressService, ProgressRepository],
   exports: [ProgressService],
-  imports: [ActivityModule,  PrismaModule, CoursesModule],
+  imports: [ActivityModule, PrismaModule, CoursesModule],
 })
 export class ProgressModule {}

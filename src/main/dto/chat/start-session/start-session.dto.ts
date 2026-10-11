@@ -1,6 +1,6 @@
 import { IsUUID, IsInt, IsOptional, IsString, IsDate } from 'class-validator';
 import { Type } from 'class-transformer';
-import { ApiProperty, ApiResponse } from '@nestjs/swagger';
+import { ApiProperty } from '@nestjs/swagger';
 
 export class ChatSessionResponseDto {
   @IsInt()

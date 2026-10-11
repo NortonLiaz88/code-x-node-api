@@ -3,16 +3,11 @@ import { GetAccountByIdRepository } from '../../../../data/protocols/db/account/
 import { GetAccountById } from 'src/domain/usecases/account/get-account/get-account';
 
 export class DbGetAccountById implements GetAccountByIdRepository {
-  constructor(
-    private readonly getAccount: GetAccountById,
-
-  ) {}
+  constructor(private readonly getAccount: GetAccountById) {}
 
   async getById(id: number): Promise<User> {
-    const accountById = await this.getAccount.getById(
-     id,
-    );
-   
+    const accountById = await this.getAccount.getById(id);
+
     return accountById;
   }
 }

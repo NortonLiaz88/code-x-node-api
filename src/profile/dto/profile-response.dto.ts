@@ -1,4 +1,4 @@
-import { Language, Interest, Destination } from "@prisma/client";
+import { Language, Interest, Destination } from '@prisma/client';
 
 // DTO para Profile
 export interface ProfileDTO {
@@ -30,5 +30,3 @@ export interface ProfileResponseDTO {
   experience: number;
   profile: ProfileDTO;
 }
-
-

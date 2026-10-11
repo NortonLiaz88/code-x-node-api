@@ -31,7 +31,11 @@ export class SendMessageController {
 
       const userData = (await this.authService.getUserByToken(token)).payload;
 
-      const response = await this.chatService.sendMessage(userData.profile.id, body.referenceId, body.message);
+      const response = await this.chatService.sendMessage(
+        userData.profile.id,
+        body.referenceId,
+        body.message,
+      );
       console.log(response);
 
       return response;

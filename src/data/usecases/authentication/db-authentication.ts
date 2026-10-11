@@ -27,8 +27,12 @@ export class DbAuthentication implements Authentication {
         account?.password,
       );
 
-
-      console.log('isValid', account.password, authentication.password, isValid);
+      console.log(
+        'isValid',
+        account.password,
+        authentication.password,
+        isValid,
+      );
 
       const { id, name, lastName, email, profile } = account;
       if (isValid) {

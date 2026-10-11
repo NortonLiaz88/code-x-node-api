@@ -57,9 +57,8 @@ export class CoursesRepository {
         userCourse: {
           userId: userId,
         },
-      }
+      },
     });
     return userActivities;
   }
-
 }

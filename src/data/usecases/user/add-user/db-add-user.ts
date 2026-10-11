@@ -1,6 +1,9 @@
 import { HttpException } from '@nestjs/common';
-import { GetUserModel, UserModel } from 'src/domain/models/user';
-import { AddUser, AddUserModel } from 'src/domain/usecases/user/add-user/add-user';
+import { GetUserModel } from 'src/domain/models/user';
+import {
+  AddUser,
+  AddUserModel,
+} from 'src/domain/usecases/user/add-user/add-user';
 
 import { AddUserRepository } from '../../../protocols/db/user/db-add-user-repository';
 import { Encrypter } from '../../../protocols/cryptography/encrypter';
@@ -27,16 +30,14 @@ export class DbAddUser implements AddUser {
       console.log('User already exists ==>', accountByEmail, accountByName);
       throw new HttpException('User already exists', 409);
     }
-    const { email, password, username, profile, schedule } =
-      data;
+    const { email, password, username, profile, schedule } = data;
 
-   
     const result = await this.addAccountRepository.add({
       email,
       password,
       username,
       profile,
-      schedule
+      schedule,
     });
 
     return result;

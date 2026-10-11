@@ -1,11 +1,10 @@
 import { Controller, Get, HttpCode, Param, Query } from '@nestjs/common';
-import { ApiBearerAuth, ApiOAuth2, ApiResponse, ApiTags } from '@nestjs/swagger';
+import { ApiBearerAuth, ApiResponse, ApiTags } from '@nestjs/swagger';
 import { PaginatedResultDTO } from 'src/main/dto/commons/pageable.dto';
 import { UserStrictResponseDto } from 'src/main/dto/user/get-paginated-users/get-users-with-pagination.dto';
 import { QueryUserDto } from 'src/main/dto/user/get-paginated-users/query-user.dto';
 import { UserResponseDto } from 'src/main/dto/user/get-user/get-user.dto';
 import { UserService } from 'src/service/user/user.service';
-
 
 @ApiBearerAuth()
 @ApiTags('users')

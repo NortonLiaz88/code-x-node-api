@@ -39,6 +39,11 @@ import { UserService } from 'src/service/user/user.service';
       },
     },
   ],
-  controllers: [CreateUserController, GetUsersContoller, UpdateUserController, DeleteUserController],
+  controllers: [
+    CreateUserController,
+    GetUsersContoller,
+    UpdateUserController,
+    DeleteUserController,
+  ],
 })
 export class UserModule {}

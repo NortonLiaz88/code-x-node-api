@@ -2,7 +2,7 @@ import {
   PaginatedResult,
   PaginationInfo,
 } from 'src/domain/commons/base/pagination.base';
-import { GetUserModel, UserModel } from 'src/domain/models/user';
+import { GetUserModel } from 'src/domain/models/user';
 
 export enum OrderByUser {
   Name = 'name',

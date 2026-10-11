@@ -30,10 +30,7 @@ export class MinioService {
     }
   }
 
-  async addObject(
-    file: any,
-    baseFilePath?: string,
-  ): Promise<void> {
+  async addObject(file: any, baseFilePath?: string): Promise<void> {
     const client = await this.getClient();
     const bucket = await this.configService.getOrThrow('MINIO_BUCKET');
 
@@ -82,14 +79,13 @@ export class MinioService {
   async getObjectStream(filePath: string): Promise<any> {
     const client = this.getClient();
     try {
-        const stream = await client.getObject('codex', filePath);
-        return stream;
+      const stream = await client.getObject('codex', filePath);
+      return stream;
     } catch (error) {
-        throw new HttpException(
-            'Could not retrieve file from storage',
-            HttpStatus.INTERNAL_SERVER_ERROR,
-        );
+      throw new HttpException(
+        'Could not retrieve file from storage',
+        HttpStatus.INTERNAL_SERVER_ERROR,
+      );
     }
-}
-
+  }
 }
