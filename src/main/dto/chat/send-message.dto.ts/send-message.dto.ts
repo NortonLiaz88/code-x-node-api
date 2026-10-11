@@ -1,4 +1,4 @@
-import { IsUUID, IsString } from 'class-validator';
+import { IsUUID, IsString, IsOptional } from 'class-validator';
 import { ApiProperty } from '@nestjs/swagger';
 
 export class SendMessageDto {
@@ -9,4 +9,13 @@ export class SendMessageDto {
   @IsString()
   @ApiProperty()
   message: string;
+
+  @IsOptional()
+  @IsUUID()
+  @ApiProperty({
+    required: false,
+    description:
+      'Id the app gives the question. Sending the same id again returns the stored answer instead of asking the tutor twice.',
+  })
+  clientMessageId?: string;
 }

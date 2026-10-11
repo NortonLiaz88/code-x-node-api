@@ -48,19 +48,36 @@ enum Role {
 }
 
 model Chat {
-  id            Int       @id @default(autoincrement())
+  id            Int         @id @default(autoincrement())
   referenceId   String?
   name          String?
-  profile       Profile?  @relation(fields: [profileId], references: [id])
+  profile       Profile?    @relation(fields: [profileId], references: [id])
   profileId     Int?
   // First topic the tutor gave the conversation, used to group history.
   topic         String?
   // Null until the student sends a first message.
   lastMessageAt DateTime?
-  createdAt     DateTime  @default(now())
-  updatedAt     DateTime  @updatedAt
+  createdAt     DateTime    @default(now())
+  updatedAt     DateTime    @updatedAt
+  replies       ChatReply[]
 
   @@index([profileId, lastMessageAt])
+}
+
+// The tutor's answer to a question the app sent with a clientMessageId, so a
+// question sent twice (offline queue, retry) is answered only once.
+model ChatReply {
+  id              Int      @id @default(autoincrement())
+  chat            Chat     @relation(fields: [chatId], references: [id], onDelete: Cascade)
+  chatId          Int
+  clientMessageId String
+  // Null while the tutor is still answering.
+  answer          String?
+  quickReplies    String[]
+  topic           String?
+  createdAt       DateTime @default(now())
+
+  @@unique([chatId, clientMessageId])
 }
 
 // model Message {

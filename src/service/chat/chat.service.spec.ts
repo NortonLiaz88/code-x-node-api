@@ -1,4 +1,4 @@
-import { NotFoundException } from '@nestjs/common';
+import { ConflictException, NotFoundException } from '@nestjs/common';
 import { ChatService } from './chat.service';
 
 const chat = {
@@ -17,7 +17,10 @@ const makeService = (sessionDoc: unknown = null) => {
     }),
   };
   const httpSendMessage = {
-    streamMessage: jest.fn(async function* () {
+    streamMessage: jest.fn(async function* (): AsyncGenerator<{
+      event: string;
+      data: unknown;
+    }> {
       yield { event: 'delta', data: { text: 'Um laço. ' } };
       yield {
         event: 'done',
@@ -30,10 +33,37 @@ const makeService = (sessionDoc: unknown = null) => {
       topic: 'Laços',
     }),
   };
+  // Stored replies by clientMessageId, as the ChatReply table keeps them.
+  const replies = new Map<string, { id: number; answer: string | null }>();
+  const byId = (id: number) =>
+    [...replies.entries()].find(([, row]) => row.id === id);
   const chatRepository = {
     getChatByReference: jest.fn().mockResolvedValue(chat),
     getConversations: jest.fn().mockResolvedValue([chat]),
     recordMessage: jest.fn().mockResolvedValue(undefined),
+    reserveReply: jest.fn(async (_chatId: number, clientMessageId: string) => {
+      const row = replies.get(clientMessageId);
+      if (row) {
+        return {
+          existing: {
+            ...row,
+            quickReplies: ['Ver exemplo'],
+            topic: 'Laços',
+            createdAt: new Date(),
+          },
+        };
+      }
+      const id = replies.size + 1;
+      replies.set(clientMessageId, { id, answer: null });
+      return { reservationId: id };
+    }),
+    saveReply: jest.fn(async (id: number, reply: { answer: string }) => {
+      byId(id)[1].answer = reply.answer;
+    }),
+    releaseReply: jest.fn(async (id: number) => {
+      const entry = byId(id);
+      if (entry && entry[1].answer === null) replies.delete(entry[0]);
+    }),
   };
   const service = new ChatService(
     sessionModel as any,
@@ -149,5 +179,111 @@ describe('ChatService', () => {
       service.streamMessage(2, chat.referenceId, 'Oi'),
     ).rejects.toBeInstanceOf(NotFoundException);
     expect(httpSendMessage.streamMessage).not.toHaveBeenCalled();
+  });
+
+  describe('with a clientMessageId', () => {
+    const clientMessageId = '0f8d2a6e-3b7c-4d21-9f10-6a2b3c4d5e6f';
+
+    it('asks the tutor once and returns the same reply when sent again', async () => {
+      const { service, httpSendMessage } = makeService();
+
+      const first = await service.sendMessage(
+        1,
+        chat.referenceId,
+        'Oi',
+        clientMessageId,
+      );
+      const second = await service.sendMessage(
+        1,
+        chat.referenceId,
+        'Oi',
+        clientMessageId,
+      );
+
+      expect(httpSendMessage.sendMessage).toHaveBeenCalledTimes(1);
+      expect(second).toEqual(first);
+    });
+
+    it('answers a repeat that arrives while the first is pending with 409', async () => {
+      const { service, chatRepository } = makeService();
+      await chatRepository.reserveReply(chat.id, clientMessageId);
+
+      await expect(
+        service.sendMessage(1, chat.referenceId, 'Oi', clientMessageId),
+      ).rejects.toBeInstanceOf(ConflictException);
+    });
+
+    it('lets a retry ask again when the tutor failed', async () => {
+      const { service, httpSendMessage } = makeService();
+      httpSendMessage.sendMessage.mockRejectedValueOnce(new Error('down'));
+
+      await expect(
+        service.sendMessage(1, chat.referenceId, 'Oi', clientMessageId),
+      ).rejects.toThrow('down');
+      const reply = await service.sendMessage(
+        1,
+        chat.referenceId,
+        'Oi',
+        clientMessageId,
+      );
+
+      expect(httpSendMessage.sendMessage).toHaveBeenCalledTimes(2);
+      expect(reply.answer).toBe('Um laço repete.');
+    });
+
+    it('streams a repeat as a single done event without asking the tutor', async () => {
+      const { service, httpSendMessage } = makeService();
+      const collect = async () => {
+        const events = [];
+        for await (const event of await service.streamMessage(
+          1,
+          chat.referenceId,
+          'Oi',
+          undefined,
+          clientMessageId,
+        )) {
+          events.push(event);
+        }
+        return events;
+      };
+
+      await collect();
+      const again = await collect();
+
+      expect(httpSendMessage.streamMessage).toHaveBeenCalledTimes(1);
+      expect(again).toEqual([
+        {
+          event: 'done',
+          data: {
+            answer: 'Um laço.',
+            quickReplies: ['Ver exemplo'],
+            topic: 'Laços',
+          },
+        },
+      ]);
+    });
+
+    it('frees the id when the stream ends with an error', async () => {
+      const { service, httpSendMessage, chatRepository } = makeService();
+      httpSendMessage.streamMessage.mockImplementationOnce(async function* () {
+        yield { event: 'error', data: { message: 'falhou' } };
+      });
+
+      const events = [];
+      for await (const event of await service.streamMessage(
+        1,
+        chat.referenceId,
+        'Oi',
+        undefined,
+        clientMessageId,
+      )) {
+        events.push(event.event);
+      }
+
+      expect(events).toEqual(['error']);
+
+      expect(chatRepository.releaseReply).toHaveBeenCalledWith(1);
+      expect(chatRepository.recordMessage).not.toHaveBeenCalled();
+    });
   });
 });

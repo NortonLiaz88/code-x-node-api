@@ -24,6 +24,10 @@ export class SendMessageController {
   @Post('send-message')
   @HttpCode(200)
   @ApiResponse({ type: ChatReplyDto, status: 200 })
+  @ApiResponse({
+    status: 409,
+    description: 'The same clientMessageId is still being answered',
+  })
   async handle(
     @Headers('Authorization') header,
     @Body() body: SendMessageDto,
@@ -37,6 +41,7 @@ export class SendMessageController {
         userData.profile.id,
         body.referenceId,
         body.message,
+        body.clientMessageId,
       );
     } catch (err) {
       if (err instanceof HttpException) {
