@@ -4,7 +4,6 @@ import { ProgressRepository } from './repository/progress.repository';
 @Injectable()
 export class ProgressService {
   constructor(private readonly progressRepository: ProgressRepository) {}
-  
 
   public async update(userId: number) {
     return await this.progressRepository.updateUserProgress(userId);
@@ -15,17 +14,19 @@ export class ProgressService {
   }
 
   public async getActivityMonthCalendar(userId: number, month: number) {
-    const calendar =  await this.progressRepository.getActivityMonthCalendar(userId, month);
+    const calendar = await this.progressRepository.getActivityMonthCalendar(
+      userId,
+      month,
+    );
     const timeSlot = await this.progressRepository.getTimeSlot(userId);
     console.log('CURRENT RESPONSE', calendar, timeSlot);
     return {
       calendar: calendar,
       ...timeSlot,
-    }
-
+    };
   }
 
-  create(createProgressDto: any) {
+  create(_createProgressDto: any) {
     return 'This action adds a new progress';
   }
 

@@ -1,6 +1,5 @@
 import { Prop, Schema, SchemaFactory } from '@nestjs/mongoose';
-import { Document, HydratedDocument, Types } from 'mongoose';
-
+import { HydratedDocument, Types } from 'mongoose';
 
 export type SessionDocument = HydratedDocument<Session>;
 
@@ -16,7 +15,11 @@ export type SessionDocument = HydratedDocument<Session>;
 //   tooltip: string[] | null;
 // }
 
-@Schema({ versionKey: false, timestamps: { createdAt: 'created_at' } , collection: 'sessions' })
+@Schema({
+  versionKey: false,
+  timestamps: { createdAt: 'created_at' },
+  collection: 'sessions',
+})
 export class Session {
   @Prop({ type: String, required: true })
   id: string;

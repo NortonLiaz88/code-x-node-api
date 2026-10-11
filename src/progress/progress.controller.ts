@@ -10,6 +10,7 @@ import {
 import { ProgressService } from './progress.service';
 import { ApiBearerAuth, ApiTags } from '@nestjs/swagger';
 import { CurrentUser } from 'src/main/decorators/current-user.decorator';
+import { Roles } from 'src/main/usecases/auth/roles.guard';
 
 @ApiBearerAuth()
 @ApiTags('progress')
@@ -17,16 +18,19 @@ import { CurrentUser } from 'src/main/decorators/current-user.decorator';
 export class ProgressController {
   constructor(private readonly progressService: ProgressService) {}
 
+  @Roles('ADMIN')
   @Post()
   create(@Body() createProgressDto: any) {
     return this.progressService.create(createProgressDto);
   }
 
+  @Roles('ADMIN')
   @Get()
   findAll() {
     return this.progressService.findAll();
   }
 
+  @Roles('ADMIN')
   @Get(':id')
   findOne(@Param('id') id: string) {
     return this.progressService.findOne(+id);
@@ -45,11 +49,13 @@ export class ProgressController {
     );
   }
 
+  @Roles('ADMIN')
   @Patch(':id')
-  update(@Param('id') id: string, @Body() updateProgressDto: any) {
+  update(@Param('id') id: string, @Body() _updateProgressDto: any) {
     return this.progressService.update(+id);
   }
 
+  @Roles('ADMIN')
   @Delete(':id')
   remove(@Param('id') id: string) {
     return this.progressService.remove(+id);

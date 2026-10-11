@@ -1,12 +1,10 @@
-
 export interface IMetaPagination {
   total: number;
   lastPage: number;
   currentPage: number;
   perPage: number;
- 
 }
-export interface PaginatedResultT  {
+export interface PaginatedResultT {
   meta: IMetaPagination;
 }
 

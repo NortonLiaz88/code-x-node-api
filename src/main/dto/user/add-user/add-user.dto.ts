@@ -19,7 +19,14 @@ import { PurchaseDto } from '../../purchase/purchase.dto';
 import { ScheduleDto } from '../../schedule/schedule.dto';
 import { UserCourseDto } from '../../user-course/user-course.dto';
 import { UserPreferenceDto } from '../../user-preference/user-preference.dto';
-import { Language, Interest, Destination, CourseLevel, DayOfWeek, TimeSlot } from '@prisma/client';
+import {
+  Language,
+  Interest,
+  Destination,
+  CourseLevel,
+  DayOfWeek,
+  TimeSlot,
+} from '@prisma/client';
 
 export class UserCreationProfileDto {
   @ApiProperty({ enum: CourseLevel })
@@ -49,8 +56,6 @@ export class UserCreationProfileDto {
   anotherDestination?: string;
 }
 
-
-
 export class UserCreationSchedule {
   @ApiPropertyOptional()
   @IsString()
@@ -65,7 +70,7 @@ export class UserCreationSchedule {
   @IsOptional()
   @IsString()
   color: string;
-  
+
   @ApiProperty()
   @IsNumber()
   goalCount: number;
@@ -74,7 +79,11 @@ export class UserCreationSchedule {
   @IsNumber()
   goalFrequency: number;
 
-  @ApiProperty({ enum: DayOfWeek, isArray: true, description: "Array of days of the week" })
+  @ApiProperty({
+    enum: DayOfWeek,
+    isArray: true,
+    description: 'Array of days of the week',
+  })
   @IsArray()
   @IsEnum(DayOfWeek, { each: true })
   days: DayOfWeek[];
@@ -83,7 +92,7 @@ export class UserCreationSchedule {
   @IsEnum(TimeSlot)
   timeSlot: TimeSlot;
 
-  @ApiProperty({ type: [Boolean], default: true})
+  @ApiProperty({ type: [Boolean], default: true })
   @IsBoolean()
   remind: boolean;
 }

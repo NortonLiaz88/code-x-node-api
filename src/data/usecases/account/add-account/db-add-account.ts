@@ -27,7 +27,7 @@ export class DbAddAccount implements AddAccount {
     if (accountByEmail || accountByName) {
       throw new HttpException('User already exists', 409);
     }
-    const { 
+    const {
       // name,
       // lastName,
       // phoneNumber,
@@ -35,7 +35,8 @@ export class DbAddAccount implements AddAccount {
       username,
       profile,
       schedule,
-      email } = data;
+      email,
+    } = data;
 
     const hashedPassword = await this.encrypter.encrypt(password);
 
@@ -47,7 +48,7 @@ export class DbAddAccount implements AddAccount {
       email,
       profile,
       password: hashedPassword,
-      schedule
+      schedule,
     });
   }
 }

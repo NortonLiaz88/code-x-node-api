@@ -1,11 +1,17 @@
 import { ApiProperty } from '@nestjs/swagger';
-import { IsInt, IsEmail, IsString, IsOptional, IsArray, IsDate } from 'class-validator';
+import {
+  IsInt,
+  IsEmail,
+  IsString,
+  IsOptional,
+  IsArray,
+  IsDate,
+} from 'class-validator';
 import { ProfileDto } from '../../profile/profile.dto';
 import { PurchaseDto } from '../../purchase/purchase.dto';
 import { ScheduleDto } from '../../schedule/schedule.dto';
 import { UserCourseDto } from '../../user-course/user-course.dto';
 import { UserPreferenceDto } from '../../user-preference/user-preference.dto';
-
 
 export class UserResponseDto {
   @ApiProperty({ example: 1 })

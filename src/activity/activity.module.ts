@@ -28,9 +28,7 @@ import { ActivityService } from './activity.service';
     ]),
     PrismaModule,
   ],
-  controllers: [
-    ActivityController,
-  ],
+  controllers: [ActivityController],
   providers: [CronActivityService, ActivityService],
   exports: [ActivityService],
 })

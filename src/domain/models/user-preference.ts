@@ -1,5 +1,3 @@
-import { UserModel } from './user';
-
 export interface UserPreference {
   id: number;
   userId: number;

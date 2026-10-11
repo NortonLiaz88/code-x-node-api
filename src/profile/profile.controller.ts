@@ -1,9 +1,14 @@
-import { BadRequestException, Body, Controller, Get, Param, Put } from '@nestjs/common';
+import {
+  BadRequestException,
+  Body,
+  Controller,
+  Get,
+  Param,
+  Put,
+} from '@nestjs/common';
 import { ProfileService } from './profile.service';
 import { CurrentUser } from 'src/main/decorators/current-user.decorator';
 import { ApiBearerAuth, ApiTags } from '@nestjs/swagger';
-import { UpdateCourseDto } from 'src/courses/dto/update-course.dto';
-import { UpdateScheduleDto } from 'src/main/dto/schedule/update-schedule/update-schedule.dto';
 import { UpdateScheduleFormDTO } from './dto/update-schedule.dto';
 import { UpdateAccountDTO } from './dto/update-account.dto';
 
@@ -30,13 +35,10 @@ export class ProfileController {
   ) {
     console.log('EDIT DATA', data);
 
-    if(!data?.password) {
+    if (!data?.password) {
       throw new BadRequestException('Password is required');
     }
-    return await this.profileService.updateUserAccount(
-      user.payload.id,
-      data,
-    );
+    return await this.profileService.updateUserAccount(user.payload.id, data);
   }
 
   @Put('/schedule/:id')
@@ -46,9 +48,9 @@ export class ProfileController {
     @Body() data: UpdateScheduleFormDTO,
   ) {
     return await this.profileService.updateUserSchedule(
+      user.payload.id,
       id,
       data,
     );
   }
-
 }

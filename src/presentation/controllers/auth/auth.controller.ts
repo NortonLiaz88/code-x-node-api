@@ -5,7 +5,7 @@ import {
   HttpStatus,
   Post,
   UnauthorizedException,
-  SetMetadata
+  SetMetadata,
 } from '@nestjs/common';
 import {
   ApiExtraModels,
@@ -20,7 +20,6 @@ import { LoginDto } from 'src/main/dto/auth/login.dto';
 import { AddUserDto } from 'src/main/dto/user/add-user/add-user.dto';
 import { RefreshTokenDto } from 'src/main/dto/auth/refresh-token.dto';
 import { AuthService } from 'src/main/usecases/auth/auth.service';
-
 
 export const IS_PUBLIC_KEY = 'isPublic';
 export const Public = () => SetMetadata(IS_PUBLIC_KEY, true);
@@ -97,7 +96,7 @@ export class AuthController {
   @ApiErrorDecorator(HttpStatus.INTERNAL_SERVER_ERROR, 'Internal Server')
   async singUp(@Body() body: AddUserDto) {
     try {
-      const result = await this.authService.addAccount(body);
+      await this.authService.addAccount(body);
       return body;
     } catch (err) {
       if (err instanceof HttpException) {

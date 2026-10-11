@@ -56,7 +56,7 @@ export class CoursesService {
     return { ...course, activities: enabledActivities };
   }
 
-  create(createCourseDto: CreateCourseDto) {
+  create(_createCourseDto: CreateCourseDto) {
     return 'This action adds a new course';
   }
 
@@ -68,7 +68,7 @@ export class CoursesService {
     return `This action returns a #${id} course`;
   }
 
-  update(id: number, updateCourseDto: UpdateCourseDto) {
+  update(id: number, _updateCourseDto: UpdateCourseDto) {
     return `This action updates a #${id} course`;
   }
 

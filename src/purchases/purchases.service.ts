@@ -8,10 +8,10 @@ import { ItemType } from '@prisma/client';
 export class PurchasesService {
   constructor(private readonly prismaService: PrismaClientService) {}
 
-  public create(createPurchaseDto: CreatePurchaseDto) {
+  public create(userId: number, createPurchaseDto: CreatePurchaseDto) {
     return this.prismaService.purchase.create({
       data: {
-        userId: 1,
+        userId,
         itemId: createPurchaseDto.itemId,
       },
     });
@@ -108,27 +108,30 @@ export class PurchasesService {
   }
 
   public async findMyAssets(userId: number) {
-    let fonts = await this.prismaService.purchase.findMany({
+    const fonts = await this.prismaService.purchase.findMany({
       where: {
+        userId,
         item: {
           type: ItemType.FONT,
-        }
+        },
       },
     });
 
-    let sounds = await this.prismaService.purchase.findMany({
+    const sounds = await this.prismaService.purchase.findMany({
       where: {
+        userId,
         item: {
           type: ItemType.SOUND_EFFECT,
-        }
+        },
       },
     });
 
-    let background = await this.prismaService.purchase.findMany({
+    const background = await this.prismaService.purchase.findMany({
       where: {
+        userId,
         item: {
           type: ItemType.WALLPAPER,
-        }
+        },
       },
     });
 
@@ -143,7 +146,7 @@ export class PurchasesService {
     return `This action returns a #${id} purchase`;
   }
 
-  update(id: number, updatePurchaseDto: UpdatePurchaseDto) {
+  update(id: number, _updatePurchaseDto: UpdatePurchaseDto) {
     return `This action updates a #${id} purchase`;
   }
 

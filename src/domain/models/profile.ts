@@ -1,4 +1,4 @@
-import {Language, Interest, Destination } from "@prisma/client";
+import { Language, Interest, Destination } from '@prisma/client';
 
 export interface Profile {
   id: number;

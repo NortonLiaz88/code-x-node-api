@@ -80,7 +80,10 @@ export class UserPostgresRepository
     };
 
     const currenData: UserModel[] = record?.map((userData) => {
-      const user = { ...userData, knowledge: CourseLevel[userData.userCourse[0].courseLevel] };
+      const user = {
+        ...userData,
+        knowledge: CourseLevel[userData.userCourse[0].courseLevel],
+      };
       delete user.password;
       return user;
     });
@@ -100,7 +103,7 @@ export class UserPostgresRepository
       },
     });
 
-    const userWithoutPassword = this.exclude(user, ['password'])
+    const userWithoutPassword = this.exclude(user, ['password']);
     return userWithoutPassword;
   }
 
@@ -117,7 +120,7 @@ export class UserPostgresRepository
       },
     });
 
-    const userWithoutPassword = this.exclude(updatedUser, ['password'])
+    const userWithoutPassword = this.exclude(updatedUser, ['password']);
     return userWithoutPassword;
   }
 
@@ -158,12 +161,11 @@ export class UserPostgresRepository
         userCourse: {
           create: {
             courseId: 1,
-            experience: 0, 
+            experience: 0,
             active: true,
             createdAt: new Date(),
             updatedAt: new Date(),
             courseLevel: user.profile.knowledge,
-  
           },
         },
         userPreference: {
@@ -172,12 +174,12 @@ export class UserPostgresRepository
             notification: true,
             soundEffects: true,
             vibration: true,
-          }
+          },
         },
       },
     });
 
-    const userWithoutPassword = this.exclude(newUser, ['password'])
+    const userWithoutPassword = this.exclude(newUser, ['password']);
     return userWithoutPassword;
   }
 
@@ -190,7 +192,7 @@ export class UserPostgresRepository
         profile: true,
       },
     });
-   
+
     return user;
   }
 

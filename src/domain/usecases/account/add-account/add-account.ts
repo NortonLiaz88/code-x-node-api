@@ -1,4 +1,4 @@
-import { UserCreationProfile } from "../../user/add-user/add-user";
+import { UserCreationProfile } from '../../user/add-user/add-user';
 
 export interface AddAccountModel {
   // name: string;

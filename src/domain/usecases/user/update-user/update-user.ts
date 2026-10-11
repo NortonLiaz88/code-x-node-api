@@ -1,5 +1,4 @@
-import { GetUserModel, UserModel } from "src/domain/models/user";
-
+import { GetUserModel } from 'src/domain/models/user';
 
 export type UpdateUserModel = {
   email?: string;

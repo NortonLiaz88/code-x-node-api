@@ -36,6 +36,22 @@ export class ProgressRepository {
       },
     });
 
+    // Users who signed up through the app have no progress row yet.
+    if (!profile.Progress) {
+      profile.Progress = await this.prismaService.progress.create({
+        data: {
+          profileId: profile.id,
+          consecutiveDays: 0,
+          exercises: 0,
+          chat: 0,
+          accumulatedDiamonds: 0,
+          accumulatedExpirience: 0,
+          done: 0,
+          accumulatedTime: 0,
+        },
+      });
+    }
+
     const isConsecutive = await this.verifyConsecutiveDays(userId);
 
     await this.prismaService.progress.update({
@@ -56,10 +72,8 @@ export class ProgressRepository {
       accumulatedDiamonds: 10,
       accumulatedExpirience: 20,
       accumulatedTime: 120,
-      consecutiveDays: isConsecutive
-        ? profile.Progress.consecutiveDays + 1
-        : 1,
-    }
+      consecutiveDays: isConsecutive ? profile.Progress.consecutiveDays + 1 : 1,
+    };
     // Implementação do método
   }
 
@@ -76,11 +90,9 @@ export class ProgressRepository {
       },
     });
 
-    const lastChatDate = new Date(lastChat.createdAt);
-
     const currentDate = new Date();
 
-    if (isSameDay(lastChatDate, currentDate)) {
+    if (lastChat && isSameDay(new Date(lastChat.createdAt), currentDate)) {
       return true;
     }
 
@@ -95,9 +107,10 @@ export class ProgressRepository {
       },
     });
 
-    const lastActivityDate = new Date(lastActivity.createdAt);
-
-    if (isSameDay(lastActivityDate, currentDate)) {
+    if (
+      lastActivity &&
+      isSameDay(new Date(lastActivity.createdAt), currentDate)
+    ) {
       return true;
     }
 
@@ -112,12 +125,12 @@ export class ProgressRepository {
         },
         createdAt: {
           gte: new Date(new Date().getFullYear(), month - 1, 1),
-          lt: new Date(new Date().getFullYear(), month, 1)
-        }
+          lt: new Date(new Date().getFullYear(), month, 1),
+        },
       },
       select: {
         createdAt: true,
-      }
+      },
     });
 
     const activityDays = await this.prismaService.userActivity.findMany({
@@ -127,17 +140,17 @@ export class ProgressRepository {
         },
         createdAt: {
           gte: new Date(new Date().getFullYear(), month - 1, 1),
-          lt: new Date(new Date().getFullYear(), month, 1)
-        }
+          lt: new Date(new Date().getFullYear(), month, 1),
+        },
       },
       select: {
         createdAt: true,
-      }
+      },
     });
 
     const daysSet = new Set<string>();
 
-    chatDays.concat(activityDays).forEach(record => {
+    chatDays.concat(activityDays).forEach((record) => {
       const day = record.createdAt.toISOString().split('T')[0]; // Extract YYYY-MM-DD
       daysSet.add(day);
     });
@@ -150,12 +163,12 @@ export class ProgressRepository {
       where: {
         user: {
           id: userId,
-        }
+        },
       },
       select: {
         timeSlot: true,
-      }
-    })
+      },
+    });
 
     return timeSlot;
   }

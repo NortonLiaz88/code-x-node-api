@@ -1,5 +1,5 @@
 import { ApiProperty } from '@nestjs/swagger';
-import { IsArray, IsBoolean, IsDate, IsInt, IsString } from 'class-validator';
+import { IsArray, IsBoolean, IsInt, IsString } from 'class-validator';
 
 export class ScheduleDto {
   @ApiProperty({ example: 1 })
@@ -38,6 +38,5 @@ export class ScheduleDto {
   @IsBoolean()
   remind: boolean;
 }
-
 
 export class ScheduleResponseDto extends ScheduleDto {}

@@ -11,7 +11,6 @@ export class DbUpdateSchedule implements UpdateSchedule {
   ) {}
 
   async update(userId: number, data: UpdateScheduleModel): Promise<Schedule> {
-
     const result = await this.updateScheduleRepository.update(userId, data);
 
     return result;

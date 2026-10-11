@@ -1,14 +1,13 @@
 import { Body, Controller, HttpCode, Param, Put } from '@nestjs/common';
-import { ApiResponse, ApiTags, ApiOAuth2, ApiBearerAuth } from '@nestjs/swagger';
+import { ApiResponse, ApiTags, ApiBearerAuth } from '@nestjs/swagger';
 import { UserResponseDto } from 'src/main/dto/user/get-user/get-user.dto';
 import { UserUpdateDto } from 'src/main/dto/user/update-user/update-user.dto';
-import { Public } from 'src/main/usecases/auth/auth.guard';
 import { UserService } from 'src/service/user/user.service';
-
+import { Roles } from 'src/main/usecases/auth/roles.guard';
 
 @ApiBearerAuth()
-@Public()
 @ApiTags('users')
+@Roles('ADMIN')
 @Controller('users')
 export class UpdateUserController {
   constructor(private readonly userService: UserService) {}

@@ -1,3 +1,4 @@
+import { Role } from '@prisma/client';
 import { Profile } from './profile';
 import { Purchase } from './purchase';
 import { Schedule } from './schedule';
@@ -20,9 +21,10 @@ export interface UserModel {
   purchases?: Purchase[];
   diamonds: number;
   experience: number;
+  role?: Role;
 
   createdAt: Date;
   updatedAt: Date;
 }
 
-export type GetUserModel =  UserModel;
+export type GetUserModel = UserModel;

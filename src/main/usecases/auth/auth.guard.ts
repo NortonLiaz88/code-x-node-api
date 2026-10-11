@@ -8,13 +8,20 @@ import {
 import { Reflector } from '@nestjs/core';
 import { JwtService } from '@nestjs/jwt';
 import { Request } from 'express';
+import {
+  ACCESS_TOKEN,
+  accessTokenSecret,
+} from 'src/infra/cryptography/token-type';
 
 export const IS_PUBLIC_KEY = 'isPublic';
 export const Public = () => SetMetadata(IS_PUBLIC_KEY, true);
 
 @Injectable()
 export class AuthGuard implements CanActivate {
-  constructor(private jwtService: JwtService, private reflector: Reflector) {}
+  constructor(
+    private jwtService: JwtService,
+    private reflector: Reflector,
+  ) {}
 
   async canActivate(context: ExecutionContext): Promise<boolean> {
     const request = context.switchToHttp().getRequest();
@@ -34,14 +41,18 @@ export class AuthGuard implements CanActivate {
       throw new UnauthorizedException();
     }
 
+    let payload;
     try {
-      const payload = await this.jwtService.verifyAsync(token, {
-        secret: `${process.env.JWT_SECRET_KEY}`,
+      payload = await this.jwtService.verifyAsync(token, {
+        secret: accessTokenSecret(),
       });
-      request['user'] = payload;
     } catch (err) {
       throw new UnauthorizedException();
     }
+    if (payload?.type !== ACCESS_TOKEN) {
+      throw new UnauthorizedException();
+    }
+    request['user'] = payload;
     return true;
   }
 

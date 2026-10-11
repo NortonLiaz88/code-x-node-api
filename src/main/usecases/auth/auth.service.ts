@@ -1,6 +1,5 @@
 import { Inject, Injectable } from '@nestjs/common';
 import { TokenDecoder } from '../../../data/protocols/cryptography/token-decoder';
-import { DbAddAccount } from '../../../data/usecases/account/add-account/db-add-account';
 import { DbAuthentication } from '../../../data/usecases/authentication/db-authentication';
 import { DbRefreshToken } from '../../../data/usecases/authentication/db-refresh-token';
 import { AuthToken } from 'src/domain/models/auth-token';
