@@ -5,9 +5,11 @@ import { UserStrictResponseDto } from 'src/main/dto/user/get-paginated-users/get
 import { QueryUserDto } from 'src/main/dto/user/get-paginated-users/query-user.dto';
 import { UserResponseDto } from 'src/main/dto/user/get-user/get-user.dto';
 import { UserService } from 'src/service/user/user.service';
+import { Roles } from 'src/main/usecases/auth/roles.guard';
 
 @ApiBearerAuth()
 @ApiTags('users')
+@Roles('ADMIN')
 @Controller('users')
 export class GetUsersContoller {
   constructor(private readonly userService: UserService) {}

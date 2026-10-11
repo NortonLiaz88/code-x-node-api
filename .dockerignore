@@ -1,4 +1,7 @@
-./dist
-./minio
-./data
-./node_modules
+node_modules
+dist
+coverage
+.env
+.git
+minio
+data

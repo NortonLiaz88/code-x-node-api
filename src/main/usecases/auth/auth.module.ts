@@ -6,6 +6,7 @@ import { PassportModule } from '@nestjs/passport';
 import { JwtStrategy } from './jwt/jwtStrategy';
 import { APP_GUARD } from '@nestjs/core';
 import { AuthGuard } from './auth.guard';
+import { RolesGuard } from './roles.guard';
 import { TokenDecoderAdapter } from 'src/infra/cryptography/token-decoder';
 import { UserModule } from '../user/user.module';
 import { makeDbAuthentication } from 'src/main/factory/auth/db-auth';
@@ -47,6 +48,10 @@ import { EncrypterAdapter } from 'src/infra/cryptography/encrypter';
     {
       provide: APP_GUARD,
       useClass: AuthGuard,
+    },
+    {
+      provide: APP_GUARD,
+      useClass: RolesGuard,
     },
   ],
   exports: [AuthService],

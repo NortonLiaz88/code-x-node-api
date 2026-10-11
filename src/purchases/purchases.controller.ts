@@ -20,8 +20,14 @@ export class PurchasesController {
   constructor(private readonly purchasesService: PurchasesService) {}
 
   @Post()
-  buyNewItem(@Body() createPurchaseDto: CreatePurchaseDto) {
-    return this.purchasesService.create(createPurchaseDto);
+  buyNewItem(
+    @CurrentUser() currentUser: any,
+    @Body() createPurchaseDto: CreatePurchaseDto,
+  ) {
+    return this.purchasesService.create(
+      currentUser.payload.id,
+      createPurchaseDto,
+    );
   }
 
   @Get()
