@@ -31,12 +31,15 @@ export class DbRefreshToken implements RefreshToken {
     const account = await this.loadAccountByEmailRepository.getByEmail(email);
 
     if (account) {
-      const { name, lastName, email } = account;
+      const { id, name, lastName, email, profile } = account;
 
+      // Same payload as login, so routes reading payload.id keep working.
       const accessToken = await this.tokenGenerator.generate({
+        id,
         name,
         lastName,
         email,
+        profile,
       });
       return accessToken;
     }
