@@ -8,6 +8,7 @@ import {
 } from 'src/infra/mongodb/chat/model';
 import { RemoteSendMessage } from 'src/data/usecases/chat/http-send-mesage';
 import { InjectModel } from '@nestjs/mongoose';
+import { ChatReplyDto } from 'src/main/dto/chat/chat-reply/chat-reply.dto';
 
 @Injectable()
 export class ChatService {
@@ -30,12 +31,7 @@ export class ChatService {
     profileId: number,
     chatId: string,
     message: string,
-  ): Promise<any> {
-    const chat = await this.httpSendMessage.sendMessage(
-      profileId,
-      chatId,
-      message,
-    );
-    return chat;
+  ): Promise<ChatReplyDto> {
+    return this.httpSendMessage.sendMessage(profileId, chatId, message);
   }
 }
