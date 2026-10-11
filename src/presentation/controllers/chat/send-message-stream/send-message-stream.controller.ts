@@ -38,6 +38,10 @@ export class SendMessageStreamController {
   @ApiProduces('text/event-stream')
   @ApiResponse({ status: 200, description: 'The event stream' })
   @ApiResponse({ status: 404, description: 'Not one of your conversations' })
+  @ApiResponse({
+    status: 409,
+    description: 'The same clientMessageId is still being answered',
+  })
   async handle(
     @Headers('Authorization') header,
     @Body() body: SendMessageDto,
@@ -56,6 +60,7 @@ export class SendMessageStreamController {
         body.referenceId,
         body.message,
         abort.signal,
+        body.clientMessageId,
       );
     } catch (err) {
       const status = err instanceof HttpException ? err.getStatus() : 500;
