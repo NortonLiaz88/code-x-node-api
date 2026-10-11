@@ -5,5 +5,8 @@ interface ChatModel {
   referenceId: string;
   profileId: number;
   name?: string;
+  topic?: string | null;
+  lastMessageAt?: Date | null;
+  createdAt?: Date;
   messages?: MessageModel[];
 }
