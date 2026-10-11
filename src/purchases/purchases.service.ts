@@ -8,10 +8,10 @@ import { ItemType } from '@prisma/client';
 export class PurchasesService {
   constructor(private readonly prismaService: PrismaClientService) {}
 
-  public create(createPurchaseDto: CreatePurchaseDto) {
+  public create(userId: number, createPurchaseDto: CreatePurchaseDto) {
     return this.prismaService.purchase.create({
       data: {
-        userId: 1,
+        userId,
         itemId: createPurchaseDto.itemId,
       },
     });
@@ -107,11 +107,10 @@ export class PurchasesService {
     };
   }
 
-  // TODO(#5): filter purchases by userId.
-  // eslint-disable-next-line @typescript-eslint/no-unused-vars
   public async findMyAssets(userId: number) {
     const fonts = await this.prismaService.purchase.findMany({
       where: {
+        userId,
         item: {
           type: ItemType.FONT,
         },
@@ -120,6 +119,7 @@ export class PurchasesService {
 
     const sounds = await this.prismaService.purchase.findMany({
       where: {
+        userId,
         item: {
           type: ItemType.SOUND_EFFECT,
         },
@@ -128,6 +128,7 @@ export class PurchasesService {
 
     const background = await this.prismaService.purchase.findMany({
       where: {
+        userId,
         item: {
           type: ItemType.WALLPAPER,
         },

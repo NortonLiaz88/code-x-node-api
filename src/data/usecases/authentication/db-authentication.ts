@@ -34,7 +34,7 @@ export class DbAuthentication implements Authentication {
         isValid,
       );
 
-      const { id, name, lastName, email, profile } = account;
+      const { id, name, lastName, email, profile, role } = account;
       if (isValid) {
         const accessToken = await this.tokenGenerator.generate({
           id,
@@ -42,6 +42,7 @@ export class DbAuthentication implements Authentication {
           lastName,
           email,
           profile,
+          role,
         });
         return accessToken;
       }

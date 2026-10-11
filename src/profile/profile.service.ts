@@ -1,4 +1,4 @@
-import { Injectable } from '@nestjs/common';
+import { Injectable, NotFoundException } from '@nestjs/common';
 import { PrismaClientService } from 'src/infra/orm/prisma/prisma-client.service';
 import { UpdateScheduleFormDTO } from './dto/update-schedule.dto';
 import { UpdateAccountDTO } from './dto/update-account.dto';
@@ -45,9 +45,17 @@ export class ProfileService {
   }
 
   public async updateUserSchedule(
+    userId: number,
     scheduleId: number,
     data: UpdateScheduleFormDTO,
   ) {
+    const owned = await this.prismaService.schedule.findFirst({
+      where: { id: +scheduleId, userId },
+    });
+    if (!owned) {
+      throw new NotFoundException('Schedule not found');
+    }
+
     const schedule = await this.prismaService.schedule.update({
       where: {
         id: +scheduleId,

@@ -39,16 +39,22 @@ model User {
   purchases      Purchase[]
   diamonds       Int             @default(0)
   experience     Float           @default(0)
+  role           Role            @default(STUDENT)
+}
+
+enum Role {
+  STUDENT
+  ADMIN
 }
 
 model Chat {
-  id          Int       @id @default(autoincrement())
+  id          Int      @id @default(autoincrement())
   referenceId String?
   name        String?
-  profile     Profile?  @relation(fields: [profileId], references: [id])
+  profile     Profile? @relation(fields: [profileId], references: [id])
   profileId   Int?
-  createdAt   DateTime  @default(now())
-  updatedAt   DateTime  @updatedAt
+  createdAt   DateTime @default(now())
+  updatedAt   DateTime @updatedAt
 }
 
 // model Message {
@@ -74,8 +80,7 @@ model Profile {
   anotherDestination        String?
   createdAt                 DateTime    @default(now())
   updatedAt                 DateTime    @updatedAt
-  Progress                  Progress? 
-
+  Progress                  Progress?
 }
 
 model UserPreference {
@@ -97,7 +102,7 @@ model Progress {
   accumulatedExpirience Float
   done                  Int
   accumulatedTime       Float
-  profileId             Int   @unique
+  profileId             Int     @unique
   profile               Profile @relation(fields: [profileId], references: [id])
 }
 

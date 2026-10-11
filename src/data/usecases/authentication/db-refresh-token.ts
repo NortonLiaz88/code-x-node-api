@@ -31,7 +31,7 @@ export class DbRefreshToken implements RefreshToken {
     const account = await this.loadAccountByEmailRepository.getByEmail(email);
 
     if (account) {
-      const { id, name, lastName, email, profile } = account;
+      const { id, name, lastName, email, profile, role } = account;
 
       // Same payload as login, so routes reading payload.id keep working.
       const accessToken = await this.tokenGenerator.generate({
@@ -40,6 +40,7 @@ export class DbRefreshToken implements RefreshToken {
         lastName,
         email,
         profile,
+        role,
       });
       return accessToken;
     }

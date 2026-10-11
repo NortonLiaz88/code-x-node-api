@@ -47,6 +47,10 @@ export class ProfileController {
     @Param('id') id: number,
     @Body() data: UpdateScheduleFormDTO,
   ) {
-    return await this.profileService.updateUserSchedule(id, data);
+    return await this.profileService.updateUserSchedule(
+      user.payload.id,
+      id,
+      data,
+    );
   }
 }
