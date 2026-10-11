@@ -1,4 +1,11 @@
-import { Controller, Get, HttpCode, Param, Query } from '@nestjs/common';
+import {
+  Controller,
+  Get,
+  HttpCode,
+  Param,
+  Query,
+  ValidationPipe,
+} from '@nestjs/common';
 import { ApiBearerAuth, ApiResponse, ApiTags } from '@nestjs/swagger';
 import { PaginatedResultDTO } from 'src/main/dto/commons/pageable.dto';
 import { UserStrictResponseDto } from 'src/main/dto/user/get-paginated-users/get-users-with-pagination.dto';
@@ -18,7 +25,9 @@ export class GetUsersContoller {
   @ApiResponse({ type: PaginatedResultDTO<UserStrictResponseDto>, status: 200 })
   @HttpCode(200)
   async handle(
-    @Query() query: QueryUserDto,
+    // transform applies the DTO defaults (page 1, take 10, newest first)
+    // when the query leaves them out.
+    @Query(new ValidationPipe({ transform: true })) query: QueryUserDto,
   ): Promise<PaginatedResultDTO<UserStrictResponseDto>> {
     const response = await this.userService.getAllWithPagination(
       { page: query.page, take: query.take },

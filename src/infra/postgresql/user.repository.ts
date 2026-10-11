@@ -15,7 +15,7 @@ import {
 } from 'src/domain/commons/base/pagination.base';
 import { OrderedUser } from 'src/domain/usecases/user/get-all-users/get-paginated-users';
 import { UpdateUserModel } from 'src/domain/usecases/user/update-user/update-user';
-import { CourseLevel } from '@prisma/client';
+import { CourseLevel, Prisma } from '@prisma/client';
 
 export class UserPostgresRepository
   implements
@@ -35,7 +35,18 @@ export class UserPostgresRepository
     ordering: OrderedUser,
     search?: string,
   ): Promise<PaginatedResult<UserModel>> {
-    const total = await this.ormService.user.count();
+    // Without a search, list everyone (users with no name included).
+    const term = search?.toString().trim();
+    const where: Prisma.UserWhereInput = term
+      ? {
+          OR: [
+            { name: { contains: term, mode: 'insensitive' } },
+            { username: { contains: term, mode: 'insensitive' } },
+            { email: { contains: term, mode: 'insensitive' } },
+          ],
+        }
+      : {};
+    const total = await this.ormService.user.count({ where });
 
     const lastPage = Math.ceil(total / pagination.take);
     const skip = +pagination.take * (+pagination.page - 1);
@@ -53,20 +64,7 @@ export class UserPostgresRepository
         userCourse: true,
         userPreference: true,
       },
-      where: {
-        OR: [
-          {
-            OR: [
-              {
-                name: {
-                  contains: search?.toString() ?? '',
-                },
-              },
-              {},
-            ],
-          },
-        ],
-      },
+      where,
       distinct: 'id',
       take: +pagination.take,
       skip,
@@ -82,7 +80,7 @@ export class UserPostgresRepository
     const currenData: UserModel[] = record?.map((userData) => {
       const user = {
         ...userData,
-        knowledge: CourseLevel[userData.userCourse[0].courseLevel],
+        knowledge: CourseLevel[userData.userCourse[0]?.courseLevel],
       };
       delete user.password;
       return user;

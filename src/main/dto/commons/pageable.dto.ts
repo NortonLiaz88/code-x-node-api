@@ -1,6 +1,6 @@
 import { ApiProperty } from '@nestjs/swagger';
 import { Transform, Type } from 'class-transformer';
-import { IsNumber, IsOptional, IsString, Min } from 'class-validator';
+import { IsNumber, IsOptional, IsString, Max, Min } from 'class-validator';
 import { toInt } from 'src/main/parsers/transform/helper';
 
 export class PageableDto {
@@ -10,10 +10,11 @@ export class PageableDto {
   @Min(1)
   page: number = 1;
 
-  @ApiProperty({ default: 10, required: false })
-  @Transform(({ value }) => toInt(value, { default: 1 }))
+  @ApiProperty({ default: 10, maximum: 100, required: false })
+  @Transform(({ value }) => toInt(value, { default: 10 }))
   @IsNumber()
   @Min(1)
+  @Max(100)
   take: number = 10;
 }
 
