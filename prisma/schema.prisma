@@ -48,13 +48,19 @@ enum Role {
 }
 
 model Chat {
-  id          Int      @id @default(autoincrement())
-  referenceId String?
-  name        String?
-  profile     Profile? @relation(fields: [profileId], references: [id])
-  profileId   Int?
-  createdAt   DateTime @default(now())
-  updatedAt   DateTime @updatedAt
+  id            Int       @id @default(autoincrement())
+  referenceId   String?
+  name          String?
+  profile       Profile?  @relation(fields: [profileId], references: [id])
+  profileId     Int?
+  // First topic the tutor gave the conversation, used to group history.
+  topic         String?
+  // Null until the student sends a first message.
+  lastMessageAt DateTime?
+  createdAt     DateTime  @default(now())
+  updatedAt     DateTime  @updatedAt
+
+  @@index([profileId, lastMessageAt])
 }
 
 // model Message {

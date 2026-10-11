@@ -13,10 +13,17 @@ import { StartSessionController } from 'src/presentation/controllers/chat/start-
 import { ChatService } from 'src/service/chat/chat.service';
 import { AuthModule } from '../auth/auth.module';
 import { makeHttpSendMessage } from 'src/main/factory/chat/htt-send-message';
+import { ChatHistoryController } from 'src/presentation/controllers/chat/history/chat-history.controller';
+import { ChatPostgresRepository } from 'src/infra/postgresql/chat.repository';
+import { PrismaClientService } from 'src/infra/orm/prisma/prisma-client.service';
 import { SendMessageController } from 'src/presentation/controllers/chat/send-message/send-message.controller';
 
 @Module({
-  controllers: [StartSessionController, SendMessageController],
+  controllers: [
+    StartSessionController,
+    SendMessageController,
+    ChatHistoryController,
+  ],
   imports: [
     MongooseModule.forFeature(
       [{ name: Session.name, schema: SessionSchema }],
@@ -30,7 +37,15 @@ import { SendMessageController } from 'src/presentation/controllers/chat/send-me
       useFactory: (sessionModel: Model<SessionDocument>) => {
         const dbStartSession = makeDbStartSession();
         const httpChat = makeHttpSendMessage();
-        return new ChatService(sessionModel, dbStartSession, httpChat);
+        const chatRepository = new ChatPostgresRepository(
+          new PrismaClientService(),
+        );
+        return new ChatService(
+          sessionModel,
+          dbStartSession,
+          httpChat,
+          chatRepository,
+        );
       },
       inject: [getModelToken(Session.name, TUTOR_SESSIONS_CONNECTION)],
     },
