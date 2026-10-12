@@ -62,18 +62,19 @@ enum Role {
 }
 
 model Chat {
-  id            Int         @id @default(autoincrement())
+  id            Int           @id @default(autoincrement())
   referenceId   String?
   name          String?
-  profile       Profile?    @relation(fields: [profileId], references: [id])
+  profile       Profile?      @relation(fields: [profileId], references: [id])
   profileId     Int?
   // First topic the tutor gave the conversation, used to group history.
   topic         String?
   // Null until the student sends a first message.
   lastMessageAt DateTime?
-  createdAt     DateTime    @default(now())
-  updatedAt     DateTime    @updatedAt
+  createdAt     DateTime      @default(now())
+  updatedAt     DateTime      @updatedAt
   replies       ChatReply[]
+  tutorMetrics  TutorMetric[]
 
   @@index([profileId, lastMessageAt])
 }
@@ -110,8 +111,10 @@ model Profile {
   profileImage              String?
   programmingLanguages      Language[]
   activeProgrammingLanguage Language
-  interests                 Interest
-  destination               Destination
+  knowledgeLevel            Knowledge?
+  interests                 Interest[]
+  motivation                String?
+  destination               Destination?
   chat                      Chat[]
   anotherInterest           String?
   anotherDestination        String?
@@ -262,6 +265,7 @@ enum Knowledge {
   NOVICE
   BEGINNER
   MIDDLE
+  PROFICIENT
 }
 
 enum Interest {
@@ -300,4 +304,26 @@ enum ActivityType {
   code_organization
   multiple_choice
   code_completion_exercise
+}
+
+// One row per question the tutor was asked, for the admin tutor metrics.
+model TutorMetric {
+  id          Int      @id @default(autoincrement())
+  chat        Chat     @relation(fields: [chatId], references: [id], onDelete: Cascade)
+  chatId      Int
+  // answered, unreachable, timeout, failed, or left (the student closed a
+  // streamed answer before it ended)
+  outcome     String
+  // Until the whole answer arrived, or until the call gave up.
+  latencyMs   Int
+  // Streamed answers only: until the first text arrived.
+  firstTextMs Int?
+  replyChars  Int      @default(0)
+  provider    String?
+  model       String?
+  streamed    Boolean  @default(false)
+  createdAt   DateTime @default(now())
+
+  @@index([createdAt])
+  @@index([chatId])
 }

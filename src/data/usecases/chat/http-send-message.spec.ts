@@ -25,9 +25,12 @@ describe('RemoteSendMessage', () => {
       'O que é um laço?',
     );
     expect(reply).toEqual({
-      answer: 'Use for.',
-      quickReplies: ['Ver exemplo'],
-      topic: 'Laços',
+      reply: {
+        answer: 'Use for.',
+        quickReplies: ['Ver exemplo'],
+        topic: 'Laços',
+      },
+      meta: { provider: null, model: null },
     });
   });
 });
@@ -101,7 +104,7 @@ describe('RemoteSendMessage.streamMessage', () => {
     return events;
   };
 
-  it('relays deltas and ends with the typed reply', async () => {
+  it('relays deltas and ends with the typed reply and the model', async () => {
     const events = await run([
       { type: 'delta', text: 'Uma pilha. ' },
       {
@@ -110,6 +113,8 @@ describe('RemoteSendMessage.streamMessage', () => {
           answer: 'Uma pilha.',
           tooltip: ['a', 'b', 'c', 'd'],
           topic: 'Pilhas',
+          provider: 'ollama',
+          model: 'qwen2.5:7b',
         },
       },
     ]);
@@ -123,6 +128,7 @@ describe('RemoteSendMessage.streamMessage', () => {
           quickReplies: ['a', 'b', 'c'],
           topic: 'Pilhas',
         },
+        meta: { provider: 'ollama', model: 'qwen2.5:7b' },
       },
     ]);
   });

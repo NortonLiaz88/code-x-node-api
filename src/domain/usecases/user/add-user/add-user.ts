@@ -1,18 +1,19 @@
 import {
-  CourseLevel,
   DayOfWeek,
   Destination,
   Interest,
+  Knowledge,
   Language,
   TimeSlot,
 } from '@prisma/client';
 import { GetUserModel } from 'src/domain/models/user';
 
 export interface UserCreationProfile {
-  knowledge: CourseLevel;
+  knowledge: Knowledge;
   programmingLanguage: Language;
-  interests: Interest;
-  destination: Destination;
+  interests: Interest[];
+  motivation?: string;
+  destination?: Destination;
   anotherInterest?: string;
   anotherDestination?: string;
 }
@@ -33,10 +34,10 @@ export interface AddUserModel {
   // lastName: string;
   password: string;
   username: string;
-  // phoneNumber: string;
+  phoneNumber?: string;
   email: string;
   profile: UserCreationProfile;
-  schedule: UserCreationSchedule;
+  schedule?: UserCreationSchedule;
 }
 
 export interface AddUser {

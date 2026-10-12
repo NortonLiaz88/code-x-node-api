@@ -14,7 +14,7 @@ async function seedProfile() {
     data: {
       activeProgrammingLanguage: Language.Python,
       destination: Destination.ACADEMIC,
-      interests: Interest.ALGORITHMS,
+      interests: [Interest.ALGORITHMS],
       user: {
         connect: {
           id: 1,
