@@ -21,6 +21,8 @@ import {
   ResetPasswordDto,
 } from './dto/password-reset.dto';
 import { PasswordResetService } from './password-reset.service';
+import { Throttle } from '@nestjs/throttler';
+import { AUTH_RATE_LIMIT } from 'src/infra/http/security/rate-limits';
 
 export const FORGOT_PASSWORD_MESSAGE =
   'Se este email tiver uma conta, enviamos um link para redefinir a senha.';
@@ -31,6 +33,7 @@ export class PasswordResetController {
   constructor(private readonly passwordReset: PasswordResetService) {}
 
   @Public()
+  @Throttle(AUTH_RATE_LIMIT)
   @Post('forgot-password')
   @HttpCode(HttpStatus.ACCEPTED)
   @ApiOperation({
@@ -44,6 +47,7 @@ export class PasswordResetController {
   }
 
   @Public()
+  @Throttle(AUTH_RATE_LIMIT)
   @Post('reset-password')
   @HttpCode(HttpStatus.NO_CONTENT)
   @ApiOperation({ summary: 'Set a new password with a reset link token' })

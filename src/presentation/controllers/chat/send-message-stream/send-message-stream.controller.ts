@@ -11,6 +11,8 @@ import { formatSse } from 'src/infra/http/chat/sse';
 import { SendMessageDto } from 'src/main/dto/chat/send-message.dto.ts/send-message.dto';
 import { ProfileId } from 'src/main/decorators/profile-id.decorator';
 import { ChatService } from 'src/service/chat/chat.service';
+import { Throttle } from '@nestjs/throttler';
+import { TUTOR_RATE_LIMIT } from 'src/infra/http/security/rate-limits';
 
 @ApiBearerAuth()
 @ApiTags('chat')
@@ -18,6 +20,7 @@ import { ChatService } from 'src/service/chat/chat.service';
 export class SendMessageStreamController {
   constructor(private readonly chatService: ChatService) {}
 
+  @Throttle(TUTOR_RATE_LIMIT)
   @Post('send-message/stream')
   @ApiOperation({
     summary: 'Send a message and stream the tutor answer',

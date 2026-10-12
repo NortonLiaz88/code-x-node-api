@@ -1,4 +1,6 @@
-import { Module } from '@nestjs/common';
+import { MiddlewareConsumer, Module, NestModule } from '@nestjs/common';
+import { APP_GUARD } from '@nestjs/core';
+import { ThrottlerGuard, ThrottlerModule } from '@nestjs/throttler';
 import { ScheduleModule } from '@nestjs/schedule';
 
 import { AppController } from './app.controller';
@@ -17,6 +19,12 @@ import { ProgressModule } from './progress/progress.module';
 import { PurchasesModule } from './purchases/purchases.module';
 import { PasswordResetModule } from './password-reset/password-reset.module';
 import { PrivacyModule } from './privacy/privacy.module';
+import { HealthModule } from './health/health.module';
+import { RequestLoggerMiddleware } from './infra/http/security/request-logger.middleware';
+import {
+  DEFAULT_RATE_LIMIT,
+  RATE_LIMIT_MESSAGE,
+} from './infra/http/security/rate-limits';
 import {
   TUTOR_SESSIONS_CONNECTION,
   tutorSessionsDbName,
@@ -26,6 +34,10 @@ import {
   imports: [
     ConfigModule.forRoot({ isGlobal: true }),
     ScheduleModule.forRoot(),
+    ThrottlerModule.forRoot({
+      throttlers: [{ name: 'default', ...DEFAULT_RATE_LIMIT }],
+      errorMessage: RATE_LIMIT_MESSAGE,
+    }),
     // Lesson templates.
     MongooseModule.forRoot(process.env.MONGO_URL, {
       dbName: 'db',
@@ -47,8 +59,13 @@ import {
     PurchasesModule,
     PasswordResetModule,
     PrivacyModule,
+    HealthModule,
   ],
   controllers: [AppController],
-  providers: [AppService],
+  providers: [AppService, { provide: APP_GUARD, useClass: ThrottlerGuard }],
 })
-export class AppModule {}
+export class AppModule implements NestModule {
+  configure(consumer: MiddlewareConsumer): void {
+    consumer.apply(RequestLoggerMiddleware).forRoutes('*');
+  }
+}

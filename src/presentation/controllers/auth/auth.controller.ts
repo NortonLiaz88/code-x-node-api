@@ -20,6 +20,8 @@ import { LoginDto } from 'src/main/dto/auth/login.dto';
 import { AddUserDto } from 'src/main/dto/user/add-user/add-user.dto';
 import { RefreshTokenDto } from 'src/main/dto/auth/refresh-token.dto';
 import { AuthService } from 'src/main/usecases/auth/auth.service';
+import { Throttle } from '@nestjs/throttler';
+import { AUTH_RATE_LIMIT } from 'src/infra/http/security/rate-limits';
 
 export const IS_PUBLIC_KEY = 'isPublic';
 export const Public = () => SetMetadata(IS_PUBLIC_KEY, true);
@@ -31,6 +33,7 @@ export class AuthController {
   constructor(private readonly authService: AuthService) {}
 
   @Public()
+  @Throttle(AUTH_RATE_LIMIT)
   @Post('login')
   @ApiResponse({
     status: 201,
@@ -87,6 +90,7 @@ export class AuthController {
   }
 
   @Public()
+  @Throttle(AUTH_RATE_LIMIT)
   @Post('sign-up')
   @ApiResponse({
     status: 201,
