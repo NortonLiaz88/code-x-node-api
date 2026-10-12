@@ -97,8 +97,10 @@ model Profile {
   profileImage              String?
   programmingLanguages      Language[]
   activeProgrammingLanguage Language
-  interests                 Interest
-  destination               Destination
+  knowledgeLevel            Knowledge?
+  interests                 Interest[]
+  motivation                String?
+  destination               Destination?
   chat                      Chat[]
   anotherInterest           String?
   anotherDestination        String?
@@ -249,6 +251,7 @@ enum Knowledge {
   NOVICE
   BEGINNER
   MIDDLE
+  PROFICIENT
 }
 
 enum Interest {

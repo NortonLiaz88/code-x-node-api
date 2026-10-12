@@ -30,12 +30,13 @@ export class DbAddUser implements AddUser {
       console.log('User already exists ==>', accountByEmail, accountByName);
       throw new HttpException('User already exists', 409);
     }
-    const { email, password, username, profile, schedule } = data;
+    const { email, password, username, phoneNumber, profile, schedule } = data;
 
     const result = await this.addAccountRepository.add({
       email,
       password,
       username,
+      phoneNumber,
       profile,
       schedule,
     });

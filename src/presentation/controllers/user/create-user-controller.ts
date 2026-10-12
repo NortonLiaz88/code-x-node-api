@@ -9,6 +9,7 @@ import {
 } from '@nestjs/common';
 import { ApiExtraModels, ApiTags } from '@nestjs/swagger';
 import { LoginResponseDto } from 'src/main/dto/auth/login-response.dto';
+import { AddUserDto } from 'src/main/dto/user/add-user/add-user.dto';
 import { UserService } from 'src/service/user/user.service';
 
 export const IS_PUBLIC_KEY = 'isPublic';
@@ -23,7 +24,7 @@ export class CreateUserController {
   @Public()
   @Post('register')
   @HttpCode(200)
-  async handle(@Body() addUserDto: any) {
+  async handle(@Body() addUserDto: AddUserDto) {
     try {
       const user = await this.userService.createUser(addUserDto);
       return user;

@@ -96,13 +96,13 @@ export class AuthController {
   @ApiErrorDecorator(HttpStatus.INTERNAL_SERVER_ERROR, 'Internal Server')
   async singUp(@Body() body: AddUserDto) {
     try {
-      await this.authService.addAccount(body);
-      return body;
+      // The created user, without the password.
+      return await this.authService.addAccount(body);
     } catch (err) {
       if (err instanceof HttpException) {
-        return new HttpException(err.message, err.getStatus());
+        throw new HttpException(err.message, err.getStatus());
       } else {
-        return new HttpException('Server error', 500);
+        throw new HttpException('Server error', 500);
       }
     }
   }

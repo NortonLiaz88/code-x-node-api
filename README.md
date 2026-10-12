@@ -69,6 +69,10 @@ To start from scratch, `docker compose down -v` removes the data volumes.
 
 To make an existing user an admin: `yarn admin:grant someone@example.com`, then log in again.
 
+### Sign-up
+
+`POST /auth/register` stores sign-up steps 1 to 5 from the requirements (RF-16) in one call: account (`email`, `username`, `password`, optional `phoneNumber`), then `profile.programmingLanguage`, `profile.knowledge` (`NOVICE`, `BEGINNER`, `MIDDLE` or `PROFICIENT`), `profile.interests` (a list) and an optional `profile.motivation` of up to 500 characters. Step 6, `schedule`, is optional until MVP 3. Invalid fields get a 400 that names them. `GET /profile/me` returns the same values.
+
 ## Environment variables
 
 Copy `.env.example` to `.env`. Inside compose, the database, Mongo, MinIO and tutor addresses are overridden with the service names, so only the secrets need filling in.

@@ -1,7 +1,8 @@
 // user-creation-profile.dto.ts
 import { ApiProperty, ApiPropertyOptional } from '@nestjs/swagger';
-import { Type } from 'class-transformer';
+import { Transform, Type } from 'class-transformer';
 import {
+  ArrayNotEmpty,
   IsArray,
   IsBoolean,
   IsDate,
@@ -12,6 +13,8 @@ import {
   IsNumber,
   IsOptional,
   IsString,
+  Matches,
+  MaxLength,
   ValidateNested,
 } from 'class-validator';
 import { ProfileDto } from '../../profile/profile.dto';
@@ -23,27 +26,47 @@ import {
   Language,
   Interest,
   Destination,
-  CourseLevel,
+  Knowledge,
   DayOfWeek,
   TimeSlot,
 } from '@prisma/client';
 
 export class UserCreationProfileDto {
-  @ApiProperty({ enum: CourseLevel })
-  @IsEnum(CourseLevel)
-  knowledge: CourseLevel;
+  @ApiProperty({ enum: Knowledge, description: 'Step 3: knowledge level' })
+  @IsEnum(Knowledge)
+  knowledge: Knowledge;
 
-  @ApiProperty({ enum: Language })
+  @ApiProperty({ enum: Language, description: 'Step 2: programming language' })
   @IsEnum(Language)
   programmingLanguage: Language;
 
-  @ApiProperty({ enum: Interest })
-  @IsEnum(Interest)
-  interests: Interest;
+  @ApiProperty({
+    enum: Interest,
+    isArray: true,
+    description: 'Step 4: topics of interest. A single value is accepted too.',
+  })
+  // Older app builds send one interest as a plain string.
+  @Transform(({ value }) =>
+    value === undefined || Array.isArray(value) ? value : [value],
+  )
+  @IsArray()
+  @ArrayNotEmpty()
+  @IsEnum(Interest, { each: true })
+  interests: Interest[];
 
-  @ApiProperty({ enum: Destination })
+  @ApiPropertyOptional({
+    maxLength: 500,
+    description: 'Step 5: why the student wants to learn, in their words',
+  })
+  @IsOptional()
+  @IsString()
+  @MaxLength(500)
+  motivation?: string;
+
+  @ApiPropertyOptional({ enum: Destination })
+  @IsOptional()
   @IsEnum(Destination)
-  destination: Destination;
+  destination?: Destination;
 
   @ApiPropertyOptional()
   @IsOptional()
@@ -57,17 +80,15 @@ export class UserCreationProfileDto {
 }
 
 export class UserCreationSchedule {
-  @ApiPropertyOptional()
+  @ApiProperty()
   @IsString()
   name: string;
 
-  @ApiPropertyOptional()
-  @IsOptional()
+  @ApiProperty()
   @IsString()
   icon: string;
 
-  @ApiPropertyOptional()
-  @IsOptional()
+  @ApiProperty()
   @IsString()
   color: string;
 
@@ -118,10 +139,12 @@ export class AddUserDto {
   @IsString()
   username: string;
 
-  // @ApiProperty()
-  // @IsNotEmpty()
-  // @IsString()
-  // phoneNumber: string;
+  @ApiPropertyOptional({ example: '+5592991234567' })
+  @IsOptional()
+  @Matches(/^\+?[0-9]{8,15}$/, {
+    message: 'phoneNumber must have 8 to 15 digits',
+  })
+  phoneNumber?: string;
 
   @ApiProperty()
   @IsNotEmpty()
@@ -133,10 +156,14 @@ export class AddUserDto {
   @Type(() => UserCreationProfileDto)
   profile: UserCreationProfileDto;
 
-  @ApiProperty({ type: UserCreationSchedule })
+  @ApiPropertyOptional({
+    type: UserCreationSchedule,
+    description: 'Step 6, which arrives in MVP 3',
+  })
+  @IsOptional()
   @ValidateNested()
   @Type(() => UserCreationSchedule)
-  schedule: UserCreationSchedule;
+  schedule?: UserCreationSchedule;
 }
 
 export class UserResponseDto {

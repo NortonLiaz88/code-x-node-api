@@ -1,4 +1,4 @@
-import { Language, Interest, Destination } from '@prisma/client';
+import { Language, Interest, Destination, Knowledge } from '@prisma/client';
 
 // DTO para Profile
 export interface ProfileDTO {
@@ -7,8 +7,10 @@ export interface ProfileDTO {
   profileImage: string | null;
   programmingLanguages: Language[];
   activeProgrammingLanguage: Language;
-  interests: Interest;
-  destination: Destination;
+  knowledgeLevel: Knowledge | null;
+  interests: Interest[];
+  motivation: string | null;
+  destination: Destination | null;
   anotherInterest: string | null;
   anotherDestination: string | null;
   createdAt: string;
@@ -19,7 +21,6 @@ export interface ProfileDTO {
 export interface ProfileResponseDTO {
   id: number;
   email: string;
-  password: string;
   username: string;
   name: string;
   lastName: string;

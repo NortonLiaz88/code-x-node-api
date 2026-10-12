@@ -16,6 +16,7 @@ import {
 import { OrderedUser } from 'src/domain/usecases/user/get-all-users/get-paginated-users';
 import { UpdateUserModel } from 'src/domain/usecases/user/update-user/update-user';
 import { CourseLevel, Prisma } from '@prisma/client';
+import { courseLevelFor } from 'src/data/usecases/user/add-user/course-level';
 
 export class UserPostgresRepository
   implements
@@ -129,24 +130,30 @@ export class UserPostgresRepository
         password: user.password,
         // name: user.name,
         // lastName: user.lastName,
-        // phoneNumber: user.phoneNumber,
+        phoneNumber: user.phoneNumber,
         username: user.username,
-        schedule: {
-          create: {
-            name: user.schedule.name,
-            icon: user.schedule.icon,
-            color: user.schedule.color,
-            goalCount: +user.schedule.goalCount,
-            goalFrequency: +user.schedule.goalFrequency,
-            days: user.schedule.days,
-            timeSlot: user.schedule.timeSlot,
-            remind: user.schedule.remind,
+        // The schedule step arrives in MVP 3.
+        ...(user.schedule && {
+          schedule: {
+            create: {
+              name: user.schedule.name,
+              icon: user.schedule.icon,
+              color: user.schedule.color,
+              goalCount: +user.schedule.goalCount,
+              goalFrequency: +user.schedule.goalFrequency,
+              days: user.schedule.days,
+              timeSlot: user.schedule.timeSlot,
+              remind: user.schedule.remind,
+            },
           },
-        },
+        }),
         profile: {
           create: {
             activeProgrammingLanguage: user.profile.programmingLanguage,
+            programmingLanguages: [user.profile.programmingLanguage],
+            knowledgeLevel: user.profile.knowledge,
             interests: user.profile.interests,
+            motivation: user.profile.motivation,
             destination: user.profile.destination,
             ...(user.profile.anotherInterest && {
               anotherInterest: user.profile.anotherInterest,
@@ -163,7 +170,7 @@ export class UserPostgresRepository
             active: true,
             createdAt: new Date(),
             updatedAt: new Date(),
-            courseLevel: user.profile.knowledge,
+            courseLevel: courseLevelFor(user.profile.knowledge),
           },
         },
         userPreference: {
