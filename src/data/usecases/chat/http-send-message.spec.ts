@@ -1,3 +1,8 @@
+import { TutorUnavailableError } from 'src/data/protocols/db/chat/db-send-message-repository';
+import {
+  TUTOR_UNAVAILABLE_MESSAGES,
+  TutorUnavailableException,
+} from 'src/main/dto/chat/tutor-unavailable.dto';
 import { RemoteSendMessage } from './http-send-mesage';
 
 describe('RemoteSendMessage', () => {
@@ -23,6 +28,55 @@ describe('RemoteSendMessage', () => {
       answer: 'Use for.',
       quickReplies: ['Ver exemplo'],
       topic: 'Laços',
+    });
+  });
+});
+
+describe('RemoteSendMessage when the tutor is unavailable', () => {
+  it('answers with a typed 503 and a message for the student', async () => {
+    const remote = {
+      streamMessage: jest.fn(),
+      sendMessage: jest
+        .fn()
+        .mockRejectedValue(new TutorUnavailableError('timeout')),
+    };
+
+    const err = await new RemoteSendMessage(remote)
+      .sendMessage(1, 'ref', 'Oi')
+      .catch((e) => e);
+
+    expect(err).toBeInstanceOf(TutorUnavailableException);
+    expect(err.getStatus()).toBe(503);
+    expect(err.getResponse()).toEqual({
+      statusCode: 503,
+      error: 'TUTOR_UNAVAILABLE',
+      reason: 'timeout',
+      message: TUTOR_UNAVAILABLE_MESSAGES.timeout,
+    });
+  });
+
+  it('ends the stream with the same message and reason', async () => {
+    const remote = {
+      sendMessage: jest.fn(),
+      streamMessage: jest.fn(async function* () {
+        yield { type: 'delta' as const, text: 'Uma' };
+        throw new TutorUnavailableError('unreachable');
+      }),
+    };
+    const events = [];
+    for await (const event of new RemoteSendMessage(remote).streamMessage(
+      'ref',
+      'Oi',
+    )) {
+      events.push(event);
+    }
+
+    expect(events[events.length - 1]).toEqual({
+      event: 'error',
+      data: {
+        message: TUTOR_UNAVAILABLE_MESSAGES.unreachable,
+        reason: 'unreachable',
+      },
     });
   });
 });

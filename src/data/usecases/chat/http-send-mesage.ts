@@ -1,10 +1,17 @@
-import { SendMessageRepository } from 'src/data/protocols/db/chat/db-send-message-repository';
+import {
+  SendMessageRepository,
+  TutorUnavailableError,
+} from 'src/data/protocols/db/chat/db-send-message-repository';
 import { SendMessage } from 'src/domain/usecases/chat/send-message/send-message';
 import {
   ChatReplyDto,
   ChatStreamEvent,
   STREAM_ERROR_MESSAGE,
 } from 'src/main/dto/chat/chat-reply/chat-reply.dto';
+import {
+  TUTOR_UNAVAILABLE_MESSAGES,
+  TutorUnavailableException,
+} from 'src/main/dto/chat/tutor-unavailable.dto';
 
 export class RemoteSendMessage implements SendMessage {
   constructor(private readonly sendMessageRemote: SendMessageRepository) {}
@@ -14,12 +21,20 @@ export class RemoteSendMessage implements SendMessage {
     chatId: string,
     message: string,
   ): Promise<ChatReplyDto> {
-    const reply = await this.sendMessageRemote.sendMessage(
-      profileId,
-      chatId,
-      message,
-    );
-    return ChatReplyDto.fromTutor(reply);
+    try {
+      const reply = await this.sendMessageRemote.sendMessage(
+        profileId,
+        chatId,
+        message,
+      );
+      return ChatReplyDto.fromTutor(reply);
+    } catch (err) {
+      // A typed 503 the app can show as is.
+      if (err instanceof TutorUnavailableError) {
+        throw new TutorUnavailableException(err.reason);
+      }
+      throw err;
+    }
   }
 
   /** The tutor's stream as the app sees it; always ends with done or error. */
@@ -45,6 +60,16 @@ export class RemoteSendMessage implements SendMessage {
       }
     } catch (err) {
       if (signal?.aborted) return;
+      if (err instanceof TutorUnavailableError) {
+        yield {
+          event: 'error',
+          data: {
+            message: TUTOR_UNAVAILABLE_MESSAGES[err.reason],
+            reason: err.reason,
+          },
+        };
+        return;
+      }
     }
     yield { event: 'error', data: { message: STREAM_ERROR_MESSAGE } };
   }

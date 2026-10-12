@@ -1,7 +1,6 @@
 import {
   Body,
   Controller,
-  Headers,
   HttpException,
   Post,
   Req,
@@ -17,23 +16,20 @@ import {
 import { Request, Response } from 'express';
 import { formatSse } from 'src/infra/http/chat/sse';
 import { SendMessageDto } from 'src/main/dto/chat/send-message.dto.ts/send-message.dto';
-import { AuthService } from 'src/main/usecases/auth/auth.service';
+import { ProfileId } from 'src/main/decorators/profile-id.decorator';
 import { ChatService } from 'src/service/chat/chat.service';
 
 @ApiBearerAuth()
 @ApiTags('chat')
 @Controller('chat')
 export class SendMessageStreamController {
-  constructor(
-    private readonly authService: AuthService,
-    private readonly chatService: ChatService,
-  ) {}
+  constructor(private readonly chatService: ChatService) {}
 
   @Post('send-message/stream')
   @ApiOperation({
     summary: 'Send a message and stream the tutor answer',
     description:
-      'Server-sent events: `delta` events `{text}` while the tutor writes, then one `done` event with the ChatReplyDto, or one `error` event `{message}`.',
+      'Server-sent events: `delta` events `{text}` while the tutor writes, then one `done` event with the ChatReplyDto, or one `error` event `{message, reason?}`. `reason` is `unreachable`, `timeout` or `failed` when the tutor itself is the problem; show `message`.',
   })
   @ApiProduces('text/event-stream')
   @ApiResponse({ status: 200, description: 'The event stream' })
@@ -43,7 +39,7 @@ export class SendMessageStreamController {
     description: 'The same clientMessageId is still being answered',
   })
   async handle(
-    @Headers('Authorization') header,
+    @ProfileId() profileId: number,
     @Body() body: SendMessageDto,
     @Req() req: Request,
     @Res() res: Response,
@@ -52,21 +48,20 @@ export class SendMessageStreamController {
     let events: AsyncGenerator<{ event: string; data: unknown }>;
 
     try {
-      const token = header.split('Bearer ')[1];
-      const userData = (await this.authService.getUserByToken(token)).payload;
       // Ownership is checked here, so a refusal is a normal HTTP error.
       events = await this.chatService.streamMessage(
-        userData.profile.id,
+        profileId,
         body.referenceId,
         body.message,
         abort.signal,
         body.clientMessageId,
       );
     } catch (err) {
-      const status = err instanceof HttpException ? err.getStatus() : 500;
-      const message =
-        err instanceof HttpException ? err.message : 'Server error';
-      res.status(status).json({ statusCode: status, message });
+      if (err instanceof HttpException) {
+        res.status(err.getStatus()).json(err.getResponse());
+      } else {
+        res.status(500).json({ statusCode: 500, message: 'Server error' });
+      }
       return;
     }
 

@@ -23,7 +23,7 @@ app ──HTTP──▶ API ──HTTP──▶ tutor ──▶ LLM (local Ollam
 - **PostgreSQL** (Prisma): users, profiles, preferences, courses, activities, progress, schedules, store items and purchases.
 - **MongoDB**: lesson templates, one collection per language (`python`, `java`, ...) in the `db` database. On startup and every 12 hours the API copies new templates into the Postgres `Activity` table. Tutor chat sessions live in the `codex` database (`TUTOR_SESSIONS_DB`): the API creates the session when a chat starts and the tutor appends the messages, so both must use the same database.
 - **MinIO**: the APK served at `GET /app`, and media.
-- **Tutor**: the API forwards chat messages to `POST {TUTOR_URL}/response` and gets back `{ messages: [{ answer, tooltip }] }`, where `tooltip` holds the quick replies.
+- **Tutor**: the API forwards chat messages to `POST {TUTOR_URL}/response` and gets back `{ messages: [{ answer, tooltip }] }`, where `tooltip` holds the quick replies. If the tutor can't be reached (retried once), stays silent longer than `TUTOR_TIMEOUT_MS`, or fails, the chat answers `503` with `{ error: 'TUTOR_UNAVAILABLE', reason, message }`, where `message` is ready to show the student; a streamed answer ends with an `error` event carrying the same `reason` and `message`.
 
 Swagger docs are at `http://localhost:8000/docs` once the API is running.
 
@@ -81,6 +81,7 @@ Copy `.env.example` to `.env`. Inside compose, the database, Mongo, MinIO and tu
 | `DATABASE_URL` | PostgreSQL connection string |
 | `MONGO_URL` | MongoDB connection string |
 | `TUTOR_SESSIONS_DB` | Database holding tutor chat sessions; must match code-x-ai (default `codex`) |
+| `TUTOR_TIMEOUT_MS` | How long to wait for the tutor before giving up, in ms (default `120000`); for streamed answers, the longest silence between events |
 | `MINIO_ENDPOINT`, `MINIO_PORT`, `MINIO_USE_SSL` | MinIO address |
 | `MINIO_ACCESS_KEY`, `MINIO_SECRET_KEY` | MinIO credentials (compose also uses them as the MinIO root user) |
 | `MINIO_BUCKET` | Bucket name (compose creates it) |
