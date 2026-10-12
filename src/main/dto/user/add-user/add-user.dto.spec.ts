@@ -3,11 +3,13 @@ import { validate } from 'class-validator';
 import { CourseLevel, Knowledge } from '@prisma/client';
 import { AddUserDto } from './add-user.dto';
 import { courseLevelFor } from 'src/data/usecases/user/add-user/course-level';
+import { PRIVACY_POLICY_VERSION } from 'src/privacy/privacy-policy';
 
 const signUp = (overrides: Record<string, unknown> = {}) => ({
   email: 'ana@example.com',
   username: 'ana.souza',
   password: 'segredo123',
+  privacyPolicyVersion: PRIVACY_POLICY_VERSION,
   profile: {
     programmingLanguage: 'Python',
     knowledge: 'BEGINNER',
@@ -32,6 +34,15 @@ const errorsFor = async (body: object) => {
 };
 
 describe('AddUserDto', () => {
+  it('needs consent to the current privacy policy', async () => {
+    expect(
+      (await errorsFor(signUp({ privacyPolicyVersion: undefined }))).paths,
+    ).toEqual(['privacyPolicyVersion']);
+    expect(
+      (await errorsFor(signUp({ privacyPolicyVersion: '2020-01-01' }))).paths,
+    ).toEqual(['privacyPolicyVersion']);
+  });
+
   it('accepts steps 1 to 5 without a schedule', async () => {
     const { paths } = await errorsFor(signUp());
 
