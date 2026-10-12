@@ -1,4 +1,5 @@
 import { ApiProperty } from '@nestjs/swagger';
+import { TutorFailure } from 'src/data/protocols/db/chat/db-send-message-repository';
 
 export const MAX_QUICK_REPLIES = 3;
 
@@ -13,7 +14,7 @@ export interface TutorReply {
 export type ChatStreamEvent =
   | { event: 'delta'; data: { text: string } }
   | { event: 'done'; data: ChatReplyDto }
-  | { event: 'error'; data: { message: string } };
+  | { event: 'error'; data: { message: string; reason?: TutorFailure } };
 
 export const STREAM_ERROR_MESSAGE =
   'Não consegui gerar uma resposta agora. Tente de novo.';
