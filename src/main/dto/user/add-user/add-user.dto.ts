@@ -18,6 +18,7 @@ import {
   ValidateNested,
 } from 'class-validator';
 import { ProfileDto } from '../../profile/profile.dto';
+import { IsAppPassword } from '../../auth/password-rules';
 import { PurchaseDto } from '../../purchase/purchase.dto';
 import { ScheduleDto } from '../../schedule/schedule.dto';
 import { UserCourseDto } from '../../user-course/user-course.dto';
@@ -129,9 +130,8 @@ export class AddUserDto {
   // @IsString()
   // lastName: string;
 
-  @ApiProperty()
-  @IsNotEmpty()
-  @IsString()
+  @ApiProperty({ description: 'At least 6 characters and one number' })
+  @IsAppPassword()
   password: string;
 
   @ApiProperty()

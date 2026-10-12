@@ -58,6 +58,7 @@ describe('AddUserDto', () => {
     const { paths } = await errorsFor(
       signUp({
         phoneNumber: '12ab',
+        password: 'semnumero',
         profile: {
           programmingLanguage: 'Python',
           knowledge: 'EXPERT',
@@ -68,6 +69,7 @@ describe('AddUserDto', () => {
     );
 
     expect(paths.sort()).toEqual([
+      'password',
       'phoneNumber',
       'profile.interests',
       'profile.knowledge',
