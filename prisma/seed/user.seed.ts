@@ -51,7 +51,7 @@ async function seedAdmin() {
     data: {
       activeProgrammingLanguage: Language.Python,
       destination: Destination.ACADEMIC,
-      interests: Interest.ALGORITHMS,
+      interests: [Interest.ALGORITHMS],
       user: {
         connect: {
           id: 1,

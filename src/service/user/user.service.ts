@@ -75,25 +75,23 @@ export class UserService {
       throw new ConflictException('Username already registered');
     }
 
-    // const existPhoneNumber = await this.dbExistUser.existUserWithPhoneNumber(
-    //   userData.phoneNumber,
-    // );
+    if (
+      userData.phoneNumber &&
+      (await this.dbExistUser.existUserWithPhoneNumber(userData.phoneNumber))
+    ) {
+      throw new ConflictException('Phone number already registered');
+    }
 
-    // if (existPhoneNumber) {
-    //   throw new ConflictException('Phone number already registered');
-    // }
-
+    const { interests } = userData.profile;
     const user = {
       ...userData,
-      lastName: userData.username,
-      phoneNumber: userData.username,
-      name: userData.username,
-      activeProgrammingLanguage: userData.profile.programmingLanguage,
+      password: await this.encrypter.encrypt(userData.password),
+      // Older app builds send one interest as a plain string.
+      profile: {
+        ...userData.profile,
+        interests: Array.isArray(interests) ? interests : [interests],
+      },
     };
-
-    user.password = await this.encrypter.encrypt(user.password);
-
-    console.log('USER PASSWORD', user.password);
 
     const result = await this.dbCreateUser.add(user);
 

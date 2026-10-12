@@ -18,15 +18,15 @@ export class ProfileService {
       },
     });
 
-    console.log('USER PROFILE', user.profile);
     const progress = await this.prismaService.progress.findUnique({
       where: {
         profileId: user.profile.id,
       },
     });
-    console.log('PROGRESS', progress);
-
-    return { ...user, progress };
+    // Never send the password hash.
+    // eslint-disable-next-line @typescript-eslint/no-unused-vars
+    const { password, ...account } = user;
+    return { ...account, progress };
   }
 
   public async getUserSchedule(userId: number) {

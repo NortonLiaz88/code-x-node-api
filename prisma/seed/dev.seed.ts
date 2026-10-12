@@ -87,7 +87,7 @@ async function seedUser(email: string, username: string, role: Role) {
       profile: {
         create: {
           activeProgrammingLanguage: Language.Python,
-          interests: Interest.ALGORITHMS,
+          interests: [Interest.ALGORITHMS],
           destination: Destination.ACADEMIC,
           Progress: {
             create: {
