@@ -15,6 +15,7 @@ import { FileModule } from './files/files.module';
 import { UserActivitiesModule } from './user-activities/user-activities.module';
 import { ProgressModule } from './progress/progress.module';
 import { PurchasesModule } from './purchases/purchases.module';
+import { PasswordResetModule } from './password-reset/password-reset.module';
 import {
   TUTOR_SESSIONS_CONNECTION,
   tutorSessionsDbName,
@@ -43,6 +44,7 @@ import {
     UserActivitiesModule,
     ProgressModule,
     PurchasesModule,
+    PasswordResetModule,
   ],
   controllers: [AppController],
   providers: [AppService],

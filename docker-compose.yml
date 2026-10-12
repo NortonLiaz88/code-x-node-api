@@ -62,6 +62,7 @@ services:
       MINIO_ENDPOINT: minio
       MINIO_PORT: '9000'
       TUTOR_URL: http://tutor:80
+      SMTP_URL: smtp://mailpit:1025
     command: sh -c "npx prisma migrate deploy && yarn seed && yarn start:dev"
     volumes:
       - .:/app
@@ -75,6 +76,15 @@ services:
         condition: service_healthy
       minio:
         condition: service_healthy
+      mailpit:
+        condition: service_started
+
+  # Catches the API's emails (password reset links). Read them at
+  # http://localhost:8025.
+  mailpit:
+    image: axllent/mailpit:v1.21.8
+    ports:
+      - '127.0.0.1:8025:8025'
 
   tutor:
     build:

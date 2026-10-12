@@ -40,6 +40,20 @@ model User {
   diamonds       Int             @default(0)
   experience     Float           @default(0)
   role           Role            @default(STUDENT)
+  passwordResets PasswordReset[]
+}
+
+// A password reset link. Only the token's SHA-256 hash is stored.
+model PasswordReset {
+  id        Int       @id @default(autoincrement())
+  user      User      @relation(fields: [userId], references: [id], onDelete: Cascade)
+  userId    Int
+  tokenHash String    @unique
+  expiresAt DateTime
+  usedAt    DateTime?
+  createdAt DateTime  @default(now())
+
+  @@index([userId])
 }
 
 enum Role {
