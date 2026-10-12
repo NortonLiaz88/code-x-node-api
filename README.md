@@ -52,7 +52,7 @@ The API container applies migrations and runs the seed before starting, so the f
 | MinIO | API `localhost:9000`, console http://localhost:9001 |
 | Ollama | http://localhost:11434 |
 
-Log in with `student@codex.local` or `admin@codex.local`, password `codex123` (or `SEED_PASSWORD`). Point the app's `API_URL` at `http://<your machine's LAN IP>:8000` to use it from a phone.
+Log in with `student@codex.local` or `admin@codex.local`, password `codex123` (or `SEED_PASSWORD`). To use it from a phone on the same Wi-Fi, set `API_BIND=0.0.0.0` in `.env` (the API is bound to `127.0.0.1` otherwise), restart with `docker compose up`, and point the app's `API_URL` at `http://<your machine's LAN IP>:8000`. Only the API is opened this way; the databases, MinIO and the tutor stay on `127.0.0.1`.
 
 The tutor uses a local model through Ollama (`LLM_PROVIDER=ollama`, `LLM_MODEL=qwen2.5:7b` by default, set in this repo's `.env`). On the first start the `ollama-pull` service downloads the model (about 5 GB) before the tutor starts; later starts reuse it from the `ollama-data` volume. To use Groq instead, set `LLM_PROVIDER=groq` and `LLM_MODEL` to a Groq model in this repo's `.env`, and `API_KEY` in `code-x-ai/.env`; the model pull is then skipped.
 

@@ -1,7 +1,7 @@
 # Local stack: Postgres, MongoDB, MinIO, this API, the tutor (code-x-ai)
 # and Ollama. Clone code-x-ai next to this repo (or set TUTOR_PATH), copy
 # .env.example to .env in both repos, then run: docker compose up --build
-# Every port is bound to 127.0.0.1 only.
+# Every port is bound to 127.0.0.1 only, except the API when API_BIND is set.
 name: codex
 
 services:
@@ -68,7 +68,8 @@ services:
       - .:/app
       - /app/node_modules
     ports:
-      - '127.0.0.1:${PORT:-8000}:8000'
+      # Set API_BIND=0.0.0.0 in .env to reach the API from a phone on your Wi-Fi.
+      - '${API_BIND:-127.0.0.1}:${PORT:-8000}:8000'
     depends_on:
       postgres:
         condition: service_healthy
