@@ -69,6 +69,10 @@ To start from scratch, `docker compose down -v` removes the data volumes.
 
 To make an existing user an admin: `yarn admin:grant someone@example.com`, then log in again.
 
+### Field errors
+
+A request with invalid fields gets a 400 whose `fields` list names each one, as `{field, message}` with a message in Portuguese where there is one. `message` keeps Nest's usual list. `PATCH /profile/me {username?, email?, phoneNumber?}` changes the account; a value someone else already has gets a 409 with the same `fields` list.
+
 ## Environment variables
 
 Copy `.env.example` to `.env`. Inside compose, the database, Mongo, MinIO and tutor addresses are overridden with the service names, so only the secrets need filling in.
