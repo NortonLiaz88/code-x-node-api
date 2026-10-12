@@ -8,12 +8,25 @@ export interface TutorReply {
   answer?: string;
   tooltip?: string[] | null;
   topic?: string | null;
+  provider?: string | null;
+  model?: string | null;
 }
+
+/** Which provider and model answered, kept for the tutor metrics only. */
+export interface TutorMeta {
+  provider: string | null;
+  model: string | null;
+}
+
+export const tutorMeta = (reply: TutorReply | undefined): TutorMeta => ({
+  provider: reply?.provider || null,
+  model: reply?.model || null,
+});
 
 /** What the app receives on POST /chat/send-message/stream. */
 export type ChatStreamEvent =
   | { event: 'delta'; data: { text: string } }
-  | { event: 'done'; data: ChatReplyDto }
+  | { event: 'done'; data: ChatReplyDto; meta?: TutorMeta }
   | { event: 'error'; data: { message: string; reason?: TutorFailure } };
 
 export const STREAM_ERROR_MESSAGE =
