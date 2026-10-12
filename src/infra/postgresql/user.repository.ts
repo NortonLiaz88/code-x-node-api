@@ -132,6 +132,8 @@ export class UserPostgresRepository
         // lastName: user.lastName,
         phoneNumber: user.phoneNumber,
         username: user.username,
+        privacyPolicyVersion: user.privacyPolicyVersion,
+        privacyConsentAt: new Date(),
         // The schedule step arrives in MVP 3.
         ...(user.schedule && {
           schedule: {

@@ -3,6 +3,7 @@ import { ApiProperty, ApiPropertyOptional } from '@nestjs/swagger';
 import { Transform, Type } from 'class-transformer';
 import {
   ArrayNotEmpty,
+  Equals,
   IsArray,
   IsBoolean,
   IsDate,
@@ -19,6 +20,7 @@ import {
 } from 'class-validator';
 import { ProfileDto } from '../../profile/profile.dto';
 import { IsAppPassword } from '../../auth/password-rules';
+import { PRIVACY_POLICY_VERSION } from 'src/privacy/privacy-policy';
 import { PurchaseDto } from '../../purchase/purchase.dto';
 import { ScheduleDto } from '../../schedule/schedule.dto';
 import { UserCourseDto } from '../../user-course/user-course.dto';
@@ -133,6 +135,16 @@ export class AddUserDto {
   @ApiProperty({ description: 'At least 6 characters and one number' })
   @IsAppPassword()
   password: string;
+
+  @ApiProperty({
+    example: PRIVACY_POLICY_VERSION,
+    description:
+      'The privacy policy version the student accepted (GET /privacy-policy). Must be the current one.',
+  })
+  @Equals(PRIVACY_POLICY_VERSION, {
+    message: 'Aceite a política de privacidade para criar a conta.',
+  })
+  privacyPolicyVersion: string;
 
   @ApiProperty()
   @IsNotEmpty()

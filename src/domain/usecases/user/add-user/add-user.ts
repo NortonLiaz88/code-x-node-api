@@ -38,6 +38,8 @@ export interface AddUserModel {
   email: string;
   profile: UserCreationProfile;
   schedule?: UserCreationSchedule;
+  // The privacy policy version the student accepted.
+  privacyPolicyVersion: string;
 }
 
 export interface AddUser {

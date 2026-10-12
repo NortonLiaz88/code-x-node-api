@@ -78,6 +78,12 @@ In compose the emails go to Mailpit; read them at http://localhost:8025. Without
 
 `POST /auth/register` stores sign-up steps 1 to 5 from the requirements (RF-16) in one call: account (`email`, `username`, `password`, optional `phoneNumber`), then `profile.programmingLanguage`, `profile.knowledge` (`NOVICE`, `BEGINNER`, `MIDDLE` or `PROFICIENT`), `profile.interests` (a list) and an optional `profile.motivation` of up to 500 characters. Step 6, `schedule`, is optional until MVP 3. Invalid fields get a 400 that names them, and an email, username or phone number someone already has gets a 409 that names every taken field (see Field errors). `GET /profile/me` returns the same values.
 
+### Privacy (LGPD)
+
+`GET /privacy-policy` returns the current policy as `{version, sections}`; the text lives in `src/privacy/privacy-policy.ts`, and changing it means a new `PRIVACY_POLICY_VERSION`. Sign-up must send that version as `privacyPolicyVersion`, and the API stores it with the date (`User.privacyPolicyVersion`, `privacyConsentAt`); any other value is refused with a field error. A signed-in student can download everything stored about them with `GET /me/export` (account, profile answers, progress, purchases and every tutor conversation from MongoDB) and delete the account with `DELETE /me`, which removes the user, every table linked to it and their tutor sessions.
+
+**Retention:** chat logs and all other personal data are kept while the account exists and deleted with it. Nothing is kept after `DELETE /me`. A unit test checks that deletion covers every table linked to a user, so a new table must be added to `PrivacyService.deleteAccount` (or cascade from the user).
+
 ### Field errors
 
 A request with invalid fields gets a 400 whose `fields` list names each one, as `{field, message}` with a message in Portuguese where there is one. `message` keeps Nest's usual list. `PATCH /profile/me {username?, email?, phoneNumber?}` changes the account; a value someone else already has gets a 409 with the same `fields` list.
