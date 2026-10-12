@@ -1,11 +1,4 @@
-import {
-  Body,
-  Controller,
-  HttpException,
-  Post,
-  Req,
-  Res,
-} from '@nestjs/common';
+import { Body, Controller, HttpException, Post, Res } from '@nestjs/common';
 import {
   ApiBearerAuth,
   ApiOperation,
@@ -13,7 +6,7 @@ import {
   ApiResponse,
   ApiTags,
 } from '@nestjs/swagger';
-import { Request, Response } from 'express';
+import { Response } from 'express';
 import { formatSse } from 'src/infra/http/chat/sse';
 import { SendMessageDto } from 'src/main/dto/chat/send-message.dto.ts/send-message.dto';
 import { ProfileId } from 'src/main/decorators/profile-id.decorator';
@@ -41,7 +34,6 @@ export class SendMessageStreamController {
   async handle(
     @ProfileId() profileId: number,
     @Body() body: SendMessageDto,
-    @Req() req: Request,
     @Res() res: Response,
   ): Promise<void> {
     const abort = new AbortController();
@@ -65,8 +57,11 @@ export class SendMessageStreamController {
       return;
     }
 
-    // Stop asking the tutor once the student leaves.
-    req.on('close', () => abort.abort());
+    // Stop asking the tutor once the student leaves. The request has already
+    // been read (and closed) by now, so it's the response that tells.
+    res.on('close', () => {
+      if (!res.writableEnded) abort.abort();
+    });
 
     res.status(200);
     res.setHeader('Content-Type', 'text/event-stream; charset=utf-8');
