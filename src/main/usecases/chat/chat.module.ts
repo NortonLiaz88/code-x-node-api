@@ -18,6 +18,9 @@ import { ChatPostgresRepository } from 'src/infra/postgresql/chat.repository';
 import { PrismaClientService } from 'src/infra/orm/prisma/prisma-client.service';
 import { SendMessageStreamController } from 'src/presentation/controllers/chat/send-message-stream/send-message-stream.controller';
 import { SendMessageController } from 'src/presentation/controllers/chat/send-message/send-message.controller';
+import { TutorMetricsController } from 'src/presentation/controllers/chat/tutor-metrics/tutor-metrics.controller';
+import { TutorMetricsRepository } from 'src/infra/postgresql/tutor-metrics.repository';
+import { TutorMetricsService } from 'src/service/chat/tutor-metrics.service';
 
 @Module({
   controllers: [
@@ -25,6 +28,7 @@ import { SendMessageController } from 'src/presentation/controllers/chat/send-me
     SendMessageController,
     SendMessageStreamController,
     ChatHistoryController,
+    TutorMetricsController,
   ],
   imports: [
     MongooseModule.forFeature(
@@ -35,8 +39,16 @@ import { SendMessageController } from 'src/presentation/controllers/chat/send-me
   ],
   providers: [
     {
+      provide: TutorMetricsRepository,
+      useFactory: () => new TutorMetricsRepository(new PrismaClientService()),
+    },
+    TutorMetricsService,
+    {
       provide: ChatService,
-      useFactory: (sessionModel: Model<SessionDocument>) => {
+      useFactory: (
+        sessionModel: Model<SessionDocument>,
+        tutorMetrics: TutorMetricsRepository,
+      ) => {
         const dbStartSession = makeDbStartSession();
         const httpChat = makeHttpSendMessage();
         const chatRepository = new ChatPostgresRepository(
@@ -47,9 +59,13 @@ import { SendMessageController } from 'src/presentation/controllers/chat/send-me
           dbStartSession,
           httpChat,
           chatRepository,
+          tutorMetrics,
         );
       },
-      inject: [getModelToken(Session.name, TUTOR_SESSIONS_CONNECTION)],
+      inject: [
+        getModelToken(Session.name, TUTOR_SESSIONS_CONNECTION),
+        TutorMetricsRepository,
+      ],
     },
   ],
 })
