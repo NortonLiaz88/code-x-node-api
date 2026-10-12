@@ -71,6 +71,24 @@ export class FieldValidationPipe extends ValidationPipe {
   }
 }
 
+// What a 409 says next to an account field someone else already uses.
+export const TAKEN_MESSAGES = {
+  username: 'Este nome de usuário já está em uso.',
+  email: 'Este email já está em uso.',
+  phoneNumber: 'Este celular já está em uso.',
+} as const;
+
+export type UniqueAccountField = keyof typeof TAKEN_MESSAGES;
+
+export const UNIQUE_FIELDS = Object.keys(
+  TAKEN_MESSAGES,
+) as UniqueAccountField[];
+
+export const takenField = (field: UniqueAccountField): FieldErrorDto => ({
+  field,
+  message: TAKEN_MESSAGES[field],
+});
+
 export const fieldConflict = (fields: FieldErrorDto[]): HttpException =>
   new ConflictException({
     statusCode: 409,

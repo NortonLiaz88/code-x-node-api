@@ -76,7 +76,7 @@ To make an existing user an admin: `yarn admin:grant someone@example.com`, then 
 In compose the emails go to Mailpit; read them at http://localhost:8025. Without `SMTP_URL`, emails are written to the API log.
 ### Sign-up
 
-`POST /auth/register` stores sign-up steps 1 to 5 from the requirements (RF-16) in one call: account (`email`, `username`, `password`, optional `phoneNumber`), then `profile.programmingLanguage`, `profile.knowledge` (`NOVICE`, `BEGINNER`, `MIDDLE` or `PROFICIENT`), `profile.interests` (a list) and an optional `profile.motivation` of up to 500 characters. Step 6, `schedule`, is optional until MVP 3. Invalid fields get a 400 that names them. `GET /profile/me` returns the same values.
+`POST /auth/register` stores sign-up steps 1 to 5 from the requirements (RF-16) in one call: account (`email`, `username`, `password`, optional `phoneNumber`), then `profile.programmingLanguage`, `profile.knowledge` (`NOVICE`, `BEGINNER`, `MIDDLE` or `PROFICIENT`), `profile.interests` (a list) and an optional `profile.motivation` of up to 500 characters. Step 6, `schedule`, is optional until MVP 3. Invalid fields get a 400 that names them, and an email, username or phone number someone already has gets a 409 that names every taken field (see Field errors). `GET /profile/me` returns the same values.
 
 ### Field errors
 

@@ -4,15 +4,13 @@ import { UpdateScheduleFormDTO } from './dto/update-schedule.dto';
 import { UpdateAccountDTO } from './dto/update-account.dto';
 import { UpdateProfileDto } from './dto/update-profile.dto';
 import { Prisma } from '@prisma/client';
-import { FieldErrorDto, fieldConflict } from 'src/main/dto/error/field-errors';
+import {
+  FieldErrorDto,
+  UNIQUE_FIELDS,
+  fieldConflict,
+  takenField,
+} from 'src/main/dto/error/field-errors';
 import * as bcrypt from 'bcrypt';
-const UNIQUE_FIELDS = ['username', 'email', 'phoneNumber'] as const;
-
-const TAKEN_MESSAGES: Record<(typeof UNIQUE_FIELDS)[number], string> = {
-  username: 'Este nome de usuário já está em uso.',
-  email: 'Este email já está em uso.',
-  phoneNumber: 'Este celular já está em uso.',
-};
 
 const ACCOUNT_FIELDS = {
   id: true,
@@ -64,7 +62,7 @@ export class ProfileService {
         where: { [field]: changes[field], NOT: { id: userId } },
         select: { id: true },
       });
-      if (other) taken.push({ field, message: TAKEN_MESSAGES[field] });
+      if (other) taken.push(takenField(field));
     }
     if (taken.length) throw fieldConflict(taken);
 
@@ -84,7 +82,7 @@ export class ProfileService {
         const target = [err.meta?.target ?? []].flat().map(String);
         throw fieldConflict(
           UNIQUE_FIELDS.filter((field) => target.includes(field)).map(
-            (field) => ({ field, message: TAKEN_MESSAGES[field] }),
+            takenField,
           ),
         );
       }

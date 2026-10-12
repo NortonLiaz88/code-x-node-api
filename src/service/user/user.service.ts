@@ -17,6 +17,11 @@ import {
   PaginatedResultDTO,
 } from 'src/main/dto/commons/pageable.dto';
 import { AddUserDto } from 'src/main/dto/user/add-user/add-user.dto';
+import {
+  FieldErrorDto,
+  fieldConflict,
+  takenField,
+} from 'src/main/dto/error/field-errors';
 import { UserStrictResponseDto } from 'src/main/dto/user/get-paginated-users/get-users-with-pagination.dto';
 import { OrderedUserDTO } from 'src/main/dto/user/get-paginated-users/ordered-user.dto';
 import { UserResponseDto } from 'src/main/dto/user/get-user/get-user.dto';
@@ -59,28 +64,21 @@ export class UserService {
   }
 
   async createUser(userData: AddUserDto): Promise<UserResponseDto> {
-    const existEmail = await this.dbExistUser.existUserWithEmail(
-      userData.email,
-    );
-
-    if (existEmail) {
-      throw new ConflictException('E-mail already registered');
+    // Every taken field at once, so the app can mark them all.
+    const taken: FieldErrorDto[] = [];
+    if (await this.dbExistUser.existUserWithEmail(userData.email)) {
+      taken.push(takenField('email'));
     }
-
-    const existUsername = await this.dbExistUser.existUserWithUsername(
-      userData.username,
-    );
-
-    if (existUsername) {
-      throw new ConflictException('Username already registered');
+    if (await this.dbExistUser.existUserWithUsername(userData.username)) {
+      taken.push(takenField('username'));
     }
-
     if (
       userData.phoneNumber &&
       (await this.dbExistUser.existUserWithPhoneNumber(userData.phoneNumber))
     ) {
-      throw new ConflictException('Phone number already registered');
+      taken.push(takenField('phoneNumber'));
     }
+    if (taken.length) throw fieldConflict(taken);
 
     const { interests } = userData.profile;
     const user = {
