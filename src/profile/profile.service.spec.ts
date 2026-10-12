@@ -1,49 +1,84 @@
-import { NotFoundException } from '@nestjs/common';
+import { ConflictException } from '@nestjs/common';
+import { Prisma } from '@prisma/client';
 import { ProfileService } from './profile.service';
-import { UpdateScheduleFormDTO } from './dto/update-schedule.dto';
 
-const data = {
-  name: 'Study',
-  icon: 'book',
-  color: '#fff',
-  goalCount: 1,
-  goalFrequency: 1,
-  days: [],
-  timeSlot: 'MORNING',
-  remind: true,
-} as unknown as UpdateScheduleFormDTO;
-
-const makeSut = () => {
-  const prisma = {
-    schedule: {
-      findFirst: jest.fn(),
-      update: jest.fn().mockResolvedValue({ id: 5 }),
-    },
+const makeService = (others: Record<string, string>[] = []) => {
+  const user = {
+    findFirst: jest.fn(async ({ where }) => {
+      const [field] = Object.keys(where).filter((k) => k !== 'NOT');
+      return others.some((o) => o[field] === where[field]) ? { id: 2 } : null;
+    }),
+    update: jest.fn(async ({ data }) => ({ id: 1, ...data })),
   };
-  const sut = new ProfileService(prisma as any);
-  return { sut, prisma };
+  const service = new ProfileService({ user } as any);
+  return { service, user };
 };
 
-describe('ProfileService.updateUserSchedule', () => {
-  it("updates the caller's own schedule", async () => {
-    const { sut, prisma } = makeSut();
-    prisma.schedule.findFirst.mockResolvedValue({ id: 5, userId: 1 });
+const conflictBody = async (promise: Promise<unknown>) => {
+  try {
+    await promise;
+  } catch (err) {
+    expect(err).toBeInstanceOf(ConflictException);
+    return (err as ConflictException).getResponse();
+  }
+  throw new Error('expected a conflict');
+};
 
-    await expect(sut.updateUserSchedule(1, 5, data)).resolves.toEqual({
-      id: 5,
+describe('ProfileService.updateProfile', () => {
+  it('saves only the fields sent, trimmed', async () => {
+    const { service, user } = makeService();
+
+    const result = await service.updateProfile(1, {
+      email: ' nova@example.com ',
     });
-    expect(prisma.schedule.findFirst).toHaveBeenCalledWith({
-      where: { id: 5, userId: 1 },
-    });
+
+    expect(user.update).toHaveBeenCalledWith(
+      expect.objectContaining({
+        where: { id: 1 },
+        data: { email: 'nova@example.com' },
+      }),
+    );
+    expect(result).not.toHaveProperty('password');
   });
 
-  it("returns 404 for another user's schedule and leaves it unchanged", async () => {
-    const { sut, prisma } = makeSut();
-    prisma.schedule.findFirst.mockResolvedValue(null);
+  it('names every field someone else already uses', async () => {
+    const { service, user } = makeService([
+      { email: 'bia@example.com' },
+      { username: 'bia' },
+    ]);
 
-    await expect(sut.updateUserSchedule(2, 5, data)).rejects.toBeInstanceOf(
-      NotFoundException,
+    const body = await conflictBody(
+      service.updateProfile(1, {
+        username: 'bia',
+        email: 'bia@example.com',
+        phoneNumber: '+5592991234567',
+      }),
     );
-    expect(prisma.schedule.update).not.toHaveBeenCalled();
+
+    expect(body).toMatchObject({
+      statusCode: 409,
+      fields: [
+        { field: 'username', message: 'Este nome de usuário já está em uso.' },
+        { field: 'email', message: 'Este email já está em uso.' },
+      ],
+    });
+    expect(user.update).not.toHaveBeenCalled();
+  });
+
+  it('names the field when the database catches the duplicate', async () => {
+    const { service, user } = makeService();
+    user.update.mockRejectedValueOnce(
+      new Prisma.PrismaClientKnownRequestError('Unique constraint failed', {
+        code: 'P2002',
+        clientVersion: '5.21.1',
+        meta: { target: ['email'] },
+      }),
+    );
+
+    const body = await conflictBody(
+      service.updateProfile(1, { email: 'bia@example.com' }),
+    );
+
+    expect(body).toMatchObject({ fields: [{ field: 'email' }] });
   });
 });

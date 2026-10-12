@@ -78,6 +78,10 @@ In compose the emails go to Mailpit; read them at http://localhost:8025. Without
 
 `POST /auth/register` stores sign-up steps 1 to 5 from the requirements (RF-16) in one call: account (`email`, `username`, `password`, optional `phoneNumber`), then `profile.programmingLanguage`, `profile.knowledge` (`NOVICE`, `BEGINNER`, `MIDDLE` or `PROFICIENT`), `profile.interests` (a list) and an optional `profile.motivation` of up to 500 characters. Step 6, `schedule`, is optional until MVP 3. Invalid fields get a 400 that names them. `GET /profile/me` returns the same values.
 
+### Field errors
+
+A request with invalid fields gets a 400 whose `fields` list names each one, as `{field, message}` with a message in Portuguese where there is one. `message` keeps Nest's usual list. `PATCH /profile/me {username?, email?, phoneNumber?}` changes the account; a value someone else already has gets a 409 with the same `fields` list.
+
 ## Environment variables
 
 Copy `.env.example` to `.env`. Inside compose, the database, Mongo, MinIO and tutor addresses are overridden with the service names, so only the secrets need filling in.
