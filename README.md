@@ -69,6 +69,11 @@ To start from scratch, `docker compose down -v` removes the data volumes.
 
 To make an existing user an admin: `yarn admin:grant someone@example.com`, then log in again.
 
+### Password reset
+
+`POST /auth/forgot-password {email}` emails a link that opens the app (`RESET_PASSWORD_URL?token=…`). It always answers 202 with the same message, so it doesn't reveal who has an account. The link works once, for 30 minutes (`RESET_TOKEN_TTL_MINUTES`), and asking again cancels the earlier link. `POST /auth/reset-password {token, password}` sets the new password (204), or answers 400 for an unknown, used or expired link. When a student can't reach their email, an admin can call `POST /admin/users/:id/password {password}`. New passwords follow the login rule: at least 6 characters and one number.
+
+In compose the emails go to Mailpit; read them at http://localhost:8025. Without `SMTP_URL`, emails are written to the API log.
 ### Sign-up
 
 `POST /auth/register` stores sign-up steps 1 to 5 from the requirements (RF-16) in one call: account (`email`, `username`, `password`, optional `phoneNumber`), then `profile.programmingLanguage`, `profile.knowledge` (`NOVICE`, `BEGINNER`, `MIDDLE` or `PROFICIENT`), `profile.interests` (a list) and an optional `profile.motivation` of up to 500 characters. Step 6, `schedule`, is optional until MVP 3. Invalid fields get a 400 that names them. `GET /profile/me` returns the same values.
@@ -91,6 +96,10 @@ Copy `.env.example` to `.env`. Inside compose, the database, Mongo, MinIO and tu
 | `MINIO_BUCKET` | Bucket name (compose creates it) |
 | `TUTOR_URL` | Base URL of the tutor service, without a trailing slash |
 | `SEED_PASSWORD` | Optional password for the seeded demo users |
+| `SMTP_URL` | Optional SMTP server for emails, such as `smtp://user:pass@host:587`; without it, emails go to the log |
+| `MAIL_FROM` | Optional sender address (default `CodeX <no-reply@codex.local>`) |
+| `RESET_PASSWORD_URL` | Optional link the reset email opens; the token is added as `?token=` (default `codex://reset-password`) |
+| `RESET_TOKEN_TTL_MINUTES` | Optional minutes a reset link works (default 30) |
 | `LLM_PROVIDER`, `LLM_MODEL` | Compose only: the tutor's model provider and model (default `ollama`, `qwen2.5:7b`) |
 | `TUTOR_PATH` | Optional, compose only: path to the code-x-ai checkout (default `../code-x-ai`) |
 
