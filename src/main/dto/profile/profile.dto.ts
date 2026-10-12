@@ -19,13 +19,24 @@ export class ProfileDto {
   @IsString()
   activeProgrammingLanguage: string;
 
-  @ApiProperty({ example: 'DEVELOPMENT' })
+  @ApiProperty({ example: 'BEGINNER', required: false })
+  @IsOptional()
   @IsString()
-  interests: string;
+  knowledgeLevel?: string;
 
-  @ApiProperty({ example: 'FRONTEND' })
+  @ApiProperty({ example: ['ALGORITHMS', 'LOOPS'] })
+  @IsArray()
+  interests: string[];
+
+  @ApiProperty({ example: 'Quero mudar de área', required: false })
+  @IsOptional()
   @IsString()
-  destination: string;
+  motivation?: string;
+
+  @ApiProperty({ example: 'ACADEMIC', required: false })
+  @IsOptional()
+  @IsString()
+  destination?: string;
 
   @ApiProperty({ example: 'React', required: false })
   @IsOptional()

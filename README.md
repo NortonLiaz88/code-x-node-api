@@ -23,7 +23,7 @@ app ──HTTP──▶ API ──HTTP──▶ tutor ──▶ LLM (local Ollam
 - **PostgreSQL** (Prisma): users, profiles, preferences, courses, activities, progress, schedules, store items and purchases.
 - **MongoDB**: lesson templates, one collection per language (`python`, `java`, ...) in the `db` database. On startup and every 12 hours the API copies new templates into the Postgres `Activity` table. Tutor chat sessions live in the `codex` database (`TUTOR_SESSIONS_DB`): the API creates the session when a chat starts and the tutor appends the messages, so both must use the same database.
 - **MinIO**: the APK served at `GET /app`, and media.
-- **Tutor**: the API forwards chat messages to `POST {TUTOR_URL}/response` and gets back `{ messages: [{ answer, tooltip }] }`, where `tooltip` holds the quick replies. If the tutor can't be reached (retried once), stays silent longer than `TUTOR_TIMEOUT_MS`, or fails, the chat answers `503` with `{ error: 'TUTOR_UNAVAILABLE', reason, message }`, where `message` is ready to show the student; a streamed answer ends with an `error` event carrying the same `reason` and `message`.
+- **Tutor**: the API forwards chat messages to `POST {TUTOR_URL}/response` and gets back `{ messages: [{ answer, tooltip }] }`, where `tooltip` holds the quick replies. If the tutor can't be reached (retried once), stays silent longer than `TUTOR_TIMEOUT_MS`, or fails, the chat answers `503` with `{ error: 'TUTOR_UNAVAILABLE', reason, message }`, where `message` is ready to show the student; a streamed answer ends with an `error` event carrying the same `reason` and `message`. Every question sent to the tutor is recorded in `TutorMetric` (outcome, latency, time to first text for streams, answer length, provider and model); admins read a day's numbers at `GET /admin/tutor-metrics?date=YYYY-MM-DD` (UTC, default today).
 
 Swagger docs are at `http://localhost:8000/docs` once the API is running.
 
@@ -68,6 +68,10 @@ To start from scratch, `docker compose down -v` removes the data volumes.
 - a few Python beginner lessons in MongoDB.
 
 To make an existing user an admin: `yarn admin:grant someone@example.com`, then log in again.
+
+### Sign-up
+
+`POST /auth/register` stores sign-up steps 1 to 5 from the requirements (RF-16) in one call: account (`email`, `username`, `password`, optional `phoneNumber`), then `profile.programmingLanguage`, `profile.knowledge` (`NOVICE`, `BEGINNER`, `MIDDLE` or `PROFICIENT`), `profile.interests` (a list) and an optional `profile.motivation` of up to 500 characters. Step 6, `schedule`, is optional until MVP 3. Invalid fields get a 400 that names them. `GET /profile/me` returns the same values.
 
 ### Field errors
 

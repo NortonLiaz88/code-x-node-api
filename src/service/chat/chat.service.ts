@@ -2,6 +2,7 @@ import {
   ConflictException,
   Inject,
   Injectable,
+  Logger,
   NotFoundException,
 } from '@nestjs/common';
 import { Model } from 'mongoose';
@@ -23,6 +24,21 @@ import {
   ChatConversationDto,
   ChatHistoryMessageDto,
 } from 'src/main/dto/chat/history/chat-history.dto';
+import {
+  TutorUnavailableDto,
+  TutorUnavailableException,
+} from 'src/main/dto/chat/tutor-unavailable.dto';
+import {
+  TutorMetricInput,
+  TutorMetricsRepository,
+  TutorOutcome,
+} from 'src/infra/postgresql/tutor-metrics.repository';
+import { TutorAnswer } from 'src/domain/usecases/chat/send-message/send-message';
+
+const failureOf = (err: unknown): TutorOutcome =>
+  err instanceof TutorUnavailableException
+    ? (err.getResponse() as TutorUnavailableDto).reason
+    : 'failed';
 
 @Injectable()
 export class ChatService {
@@ -32,7 +48,10 @@ export class ChatService {
     @Inject() private readonly dbStartSession: DbStartSession,
     @Inject() private readonly httpSendMessage: RemoteSendMessage,
     @Inject() private readonly chatRepository: ChatPostgresRepository,
+    @Inject() private readonly tutorMetrics: TutorMetricsRepository,
   ) {}
+
+  private readonly logger = new Logger(ChatService.name);
 
   async startSession(profileId: number): Promise<ChatModel> {
     const session = new this.sessionModel({ id: uuidv4() });
@@ -52,19 +71,34 @@ export class ChatService {
     const claim = await this.claim(chat, clientMessageId);
     if ('reply' in claim) return claim.reply;
 
-    let reply: ChatReplyDto;
+    const started = Date.now();
+    let answer: TutorAnswer;
     try {
-      reply = await this.httpSendMessage.sendMessage(
+      answer = await this.httpSendMessage.sendMessage(
         profileId,
         referenceId,
         message,
       );
     } catch (err) {
       await this.release(claim.reservationId);
+      await this.recordMetric({
+        chatId: chat.id,
+        outcome: failureOf(err),
+        latencyMs: Date.now() - started,
+        streamed: false,
+      });
       throw err;
     }
-    await this.finish(chat, claim.reservationId, reply);
-    return reply;
+    await this.finish(chat, claim.reservationId, answer.reply);
+    await this.recordMetric({
+      chatId: chat.id,
+      outcome: 'answered',
+      latencyMs: Date.now() - started,
+      replyChars: answer.reply.answer.length,
+      ...answer.meta,
+      streamed: false,
+    });
+    return answer.reply;
   }
 
   /**
@@ -95,20 +129,40 @@ export class ChatService {
     const finish = (reply: ChatReplyDto) =>
       this.finish(chat, claim.reservationId, reply);
     const release = () => this.release(claim.reservationId);
+    const record = (metric: Omit<TutorMetricInput, 'chatId' | 'streamed'>) =>
+      this.recordMetric({ ...metric, chatId: chat.id, streamed: true });
 
-    return (async function* () {
-      let done = false;
+    return (async function* (): AsyncGenerator<ChatStreamEvent> {
+      const started = Date.now();
+      let firstTextMs: number | null = null;
+      // Stays 'left' when the student closes the stream before it ends.
+      let outcome: TutorOutcome = 'left';
+      let answered: ChatStreamEvent & { event: 'done' };
       try {
         for await (const item of events) {
+          if (item.event === 'delta' && firstTextMs === null) {
+            firstTextMs = Date.now() - started;
+          }
+          if (item.event === 'error') outcome = item.data.reason ?? 'failed';
           if (item.event === 'done') {
             await finish(item.data);
-            done = true;
+            outcome = 'answered';
+            answered = item;
+            yield { event: 'done', data: item.data };
+          } else {
+            yield item;
           }
-          yield item;
         }
       } finally {
         // An error or a student who left frees the id for a retry.
-        if (!done) await release();
+        if (outcome !== 'answered') await release();
+        await record({
+          outcome,
+          latencyMs: Date.now() - started,
+          firstTextMs,
+          replyChars: answered?.data.answer.length ?? 0,
+          ...answered?.meta,
+        });
       }
     })();
   }
@@ -150,6 +204,15 @@ export class ChatService {
       await this.chatRepository.saveReply(reservationId, reply);
     }
     await this.chatRepository.recordMessage(chat, reply.topic);
+  }
+
+  // Metrics never get in the way of an answer.
+  private async recordMetric(metric: TutorMetricInput): Promise<void> {
+    try {
+      await this.tutorMetrics.record(metric);
+    } catch (err) {
+      this.logger.warn(`Could not record a tutor metric: ${err}`);
+    }
   }
 
   private async release(reservationId: number | null): Promise<void> {

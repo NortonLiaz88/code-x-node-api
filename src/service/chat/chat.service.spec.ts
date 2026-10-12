@@ -1,4 +1,5 @@
 import { ConflictException, NotFoundException } from '@nestjs/common';
+import { TutorUnavailableException } from 'src/main/dto/chat/tutor-unavailable.dto';
 import { ChatService } from './chat.service';
 
 const chat = {
@@ -20,19 +21,25 @@ const makeService = (sessionDoc: unknown = null) => {
     streamMessage: jest.fn(async function* (): AsyncGenerator<{
       event: string;
       data: unknown;
+      meta?: unknown;
     }> {
       yield { event: 'delta', data: { text: 'Um laço. ' } };
       yield {
         event: 'done',
         data: { answer: 'Um laço.', quickReplies: [], topic: 'Laços' },
+        meta: { provider: 'ollama', model: 'qwen2.5:7b' },
       };
     }),
     sendMessage: jest.fn().mockResolvedValue({
-      answer: 'Um laço repete.',
-      quickReplies: ['Ver exemplo'],
-      topic: 'Laços',
+      reply: {
+        answer: 'Um laço repete.',
+        quickReplies: ['Ver exemplo'],
+        topic: 'Laços',
+      },
+      meta: { provider: 'ollama', model: 'qwen2.5:7b' },
     }),
   };
+  const tutorMetrics = { record: jest.fn().mockResolvedValue(undefined) };
   // Stored replies by clientMessageId, as the ChatReply table keeps them.
   const replies = new Map<string, { id: number; answer: string | null }>();
   const byId = (id: number) =>
@@ -70,8 +77,15 @@ const makeService = (sessionDoc: unknown = null) => {
     {} as any,
     httpSendMessage as any,
     chatRepository as any,
+    tutorMetrics as any,
   );
-  return { service, sessionModel, httpSendMessage, chatRepository };
+  return {
+    service,
+    sessionModel,
+    httpSendMessage,
+    chatRepository,
+    tutorMetrics,
+  };
 };
 
 describe('ChatService', () => {
@@ -179,6 +193,104 @@ describe('ChatService', () => {
       service.streamMessage(2, chat.referenceId, 'Oi'),
     ).rejects.toBeInstanceOf(NotFoundException);
     expect(httpSendMessage.streamMessage).not.toHaveBeenCalled();
+  });
+
+  describe('tutor metrics', () => {
+    const drain = async (events: AsyncGenerator<unknown>) => {
+      const items = [];
+      for await (const item of events) items.push(item);
+      return items;
+    };
+
+    it('records an answered question with its length and model', async () => {
+      const { service, tutorMetrics } = makeService();
+
+      await service.sendMessage(1, chat.referenceId, 'Oi');
+
+      expect(tutorMetrics.record).toHaveBeenCalledWith({
+        chatId: chat.id,
+        outcome: 'answered',
+        latencyMs: expect.any(Number),
+        replyChars: 'Um laço repete.'.length,
+        provider: 'ollama',
+        model: 'qwen2.5:7b',
+        streamed: false,
+      });
+    });
+
+    it('records why the tutor did not answer', async () => {
+      const { service, httpSendMessage, tutorMetrics } = makeService();
+      httpSendMessage.sendMessage.mockRejectedValueOnce(
+        new TutorUnavailableException('timeout'),
+      );
+
+      await expect(
+        service.sendMessage(1, chat.referenceId, 'Oi'),
+      ).rejects.toBeInstanceOf(TutorUnavailableException);
+      expect(tutorMetrics.record).toHaveBeenCalledWith(
+        expect.objectContaining({ outcome: 'timeout', streamed: false }),
+      );
+    });
+
+    it('still answers when the metric cannot be saved', async () => {
+      const { service, tutorMetrics } = makeService();
+      tutorMetrics.record.mockRejectedValueOnce(new Error('db down'));
+
+      const reply = await service.sendMessage(1, chat.referenceId, 'Oi');
+
+      expect(reply.answer).toBe('Um laço repete.');
+    });
+
+    it('records a streamed answer with the time to its first text', async () => {
+      const { service, tutorMetrics } = makeService();
+
+      const events = await drain(
+        await service.streamMessage(1, chat.referenceId, 'Oi'),
+      );
+
+      expect(events[events.length - 1]).toEqual({
+        event: 'done',
+        data: { answer: 'Um laço.', quickReplies: [], topic: 'Laços' },
+      });
+      expect(tutorMetrics.record).toHaveBeenCalledWith({
+        chatId: chat.id,
+        outcome: 'answered',
+        latencyMs: expect.any(Number),
+        firstTextMs: expect.any(Number),
+        replyChars: 'Um laço.'.length,
+        provider: 'ollama',
+        model: 'qwen2.5:7b',
+        streamed: true,
+      });
+    });
+
+    it('records the reason a stream ended with an error', async () => {
+      const { service, httpSendMessage, tutorMetrics } = makeService();
+      httpSendMessage.streamMessage.mockImplementationOnce(async function* () {
+        yield {
+          event: 'error',
+          data: { message: 'fora do ar', reason: 'unreachable' },
+        };
+      });
+
+      await drain(await service.streamMessage(1, chat.referenceId, 'Oi'));
+
+      expect(tutorMetrics.record).toHaveBeenCalledWith(
+        expect.objectContaining({ outcome: 'unreachable', replyChars: 0 }),
+      );
+    });
+
+    it('records a student who left before the answer ended', async () => {
+      const { service, tutorMetrics } = makeService();
+
+      const events = await service.streamMessage(1, chat.referenceId, 'Oi');
+      await events.next(); // the first delta
+      await events.return(undefined);
+
+      expect(tutorMetrics.record).toHaveBeenCalledWith(
+        expect.objectContaining({ outcome: 'left', streamed: true }),
+      );
+    });
   });
 
   describe('with a clientMessageId', () => {
