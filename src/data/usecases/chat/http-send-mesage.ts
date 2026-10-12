@@ -2,11 +2,15 @@ import {
   SendMessageRepository,
   TutorUnavailableError,
 } from 'src/data/protocols/db/chat/db-send-message-repository';
-import { SendMessage } from 'src/domain/usecases/chat/send-message/send-message';
+import {
+  SendMessage,
+  TutorAnswer,
+} from 'src/domain/usecases/chat/send-message/send-message';
 import {
   ChatReplyDto,
   ChatStreamEvent,
   STREAM_ERROR_MESSAGE,
+  tutorMeta,
 } from 'src/main/dto/chat/chat-reply/chat-reply.dto';
 import {
   TUTOR_UNAVAILABLE_MESSAGES,
@@ -20,14 +24,14 @@ export class RemoteSendMessage implements SendMessage {
     profileId: number,
     chatId: string,
     message: string,
-  ): Promise<ChatReplyDto> {
+  ): Promise<TutorAnswer> {
     try {
       const reply = await this.sendMessageRemote.sendMessage(
         profileId,
         chatId,
         message,
       );
-      return ChatReplyDto.fromTutor(reply);
+      return { reply: ChatReplyDto.fromTutor(reply), meta: tutorMeta(reply) };
     } catch (err) {
       // A typed 503 the app can show as is.
       if (err instanceof TutorUnavailableError) {
@@ -52,7 +56,11 @@ export class RemoteSendMessage implements SendMessage {
         if (item.type === 'delta') {
           yield { event: 'delta', data: { text: item.text } };
         } else if (item.type === 'done') {
-          yield { event: 'done', data: ChatReplyDto.fromTutor(item.reply) };
+          yield {
+            event: 'done',
+            data: ChatReplyDto.fromTutor(item.reply),
+            meta: tutorMeta(item.reply),
+          };
           return;
         } else {
           break;
