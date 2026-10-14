@@ -23,12 +23,35 @@ export const asScenario = (value: unknown): TutorScenario | '' =>
     ? (value as TutorScenario)
     : '';
 
+/**
+ * The tutor's subject agents (code-x-ai src/infra/llm/subjects.py). Each one
+ * teaches only its subject; `fundamentals` is the default.
+ */
+export const TUTOR_SUBJECTS = [
+  'fundamentals',
+  'data_structures',
+  'algorithms',
+  'recursion_dp',
+] as const;
+export type TutorSubject = (typeof TUTOR_SUBJECTS)[number];
+
+export const asSubject = (value: unknown): TutorSubject | '' =>
+  TUTOR_SUBJECTS.includes(value as TutorSubject) ? (value as TutorSubject) : '';
+
+/** What the student picked for the conversation, passed on to the tutor. */
+export interface TutorPick {
+  scenario?: TutorScenario;
+  subject?: TutorSubject;
+}
+
 /** Reply as the tutor service (code-x-ai) sends it. */
 export interface TutorReply {
   answer?: string;
   tooltip?: string[] | null;
   topic?: string | null;
   scenario?: string | null;
+  subject?: string | null;
+  suggested_subject?: string | null;
   provider?: string | null;
   model?: string | null;
 }
@@ -79,6 +102,22 @@ export class ChatReplyDto {
   })
   scenario: TutorScenario | '';
 
+  @ApiProperty({
+    enum: [...TUTOR_SUBJECTS, ''],
+    description:
+      'The subject agent of the conversation, empty when unknown (for example before the tutor has read one)',
+    example: 'data_structures',
+  })
+  subject: TutorSubject | '';
+
+  @ApiProperty({
+    enum: [...TUTOR_SUBJECTS, ''],
+    description:
+      'Set when the question belongs to another agent: the answer only points there, and the app can offer a new chat with it. Empty otherwise',
+    example: '',
+  })
+  suggestedSubject: TutorSubject | '';
+
   static fromTutor(reply: TutorReply | undefined): ChatReplyDto {
     const quickReplies = (reply?.tooltip ?? [])
       .filter((item) => typeof item === 'string')
@@ -91,6 +130,8 @@ export class ChatReplyDto {
       quickReplies,
       topic: reply?.topic?.trim() ?? '',
       scenario: asScenario(reply?.scenario),
+      subject: asSubject(reply?.subject),
+      suggestedSubject: asSubject(reply?.suggested_subject),
     };
   }
 }

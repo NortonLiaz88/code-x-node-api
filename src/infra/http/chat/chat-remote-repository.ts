@@ -8,7 +8,7 @@ import {
 } from 'src/data/protocols/db/chat/db-send-message-repository';
 import {
   TutorReply,
-  TutorScenario,
+  TutorPick,
 } from 'src/main/dto/chat/chat-reply/chat-reply.dto';
 import { parseSse } from './sse';
 import { TutorConfig, tutorConfig } from './tutor-config';
@@ -35,13 +35,13 @@ export class ChatRemoteRepository implements SendMessageRepository {
     profileId: number,
     referenceId: string,
     message: string,
-    scenario?: TutorScenario,
+    pick: TutorPick = {},
   ): Promise<TutorReply> {
     const response = await this.withRetry(() =>
       firstValueFrom(
         this.http.post<TutorResponse>(
           `${this.config.url}/response`,
-          { session_id: referenceId, message, scenario },
+          { session_id: referenceId, message, ...pick },
           { timeout: this.config.timeoutMs },
         ),
       ),
@@ -57,7 +57,7 @@ export class ChatRemoteRepository implements SendMessageRepository {
     referenceId: string,
     message: string,
     signal?: AbortSignal,
-    scenario?: TutorScenario,
+    pick: TutorPick = {},
   ): AsyncGenerator<TutorStreamEvent> {
     const request = new AbortController();
     const stop = () => request.abort();
@@ -78,7 +78,7 @@ export class ChatRemoteRepository implements SendMessageRepository {
       const response = await this.withRetry(() =>
         this.http.axiosRef.post<Readable>(
           `${this.config.url}/response/stream`,
-          { session_id: referenceId, message, scenario },
+          { session_id: referenceId, message, ...pick },
           { responseType: 'stream', signal: request.signal, timeout: 0 },
         ),
       );

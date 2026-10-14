@@ -46,6 +46,10 @@ export class Session {
   @Prop({ type: String, default: null })
   scenario: string | null;
 
+  // Written by the tutor: the subject agent of the conversation.
+  @Prop({ type: String, default: null })
+  subject: string | null;
+
   @Prop({ default: Date.now, type: Date })
   created_at: Date;
 }

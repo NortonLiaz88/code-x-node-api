@@ -10,7 +10,7 @@ import {
   ChatReplyDto,
   ChatStreamEvent,
   STREAM_ERROR_MESSAGE,
-  TutorScenario,
+  TutorPick,
   tutorMeta,
 } from 'src/main/dto/chat/chat-reply/chat-reply.dto';
 import {
@@ -25,14 +25,14 @@ export class RemoteSendMessage implements SendMessage {
     profileId: number,
     chatId: string,
     message: string,
-    scenario?: TutorScenario,
+    pick: TutorPick = {},
   ): Promise<TutorAnswer> {
     try {
       const reply = await this.sendMessageRemote.sendMessage(
         profileId,
         chatId,
         message,
-        scenario,
+        pick,
       );
       return { reply: ChatReplyDto.fromTutor(reply), meta: tutorMeta(reply) };
     } catch (err) {
@@ -49,14 +49,14 @@ export class RemoteSendMessage implements SendMessage {
     chatId: string,
     message: string,
     signal?: AbortSignal,
-    scenario?: TutorScenario,
+    pick: TutorPick = {},
   ): AsyncGenerator<ChatStreamEvent> {
     try {
       for await (const item of this.sendMessageRemote.streamMessage(
         chatId,
         message,
         signal,
-        scenario,
+        pick,
       )) {
         if (item.type === 'delta') {
           yield { event: 'delta', data: { text: item.text } };
