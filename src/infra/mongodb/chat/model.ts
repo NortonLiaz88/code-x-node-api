@@ -42,6 +42,10 @@ export class Session {
   @Prop({ type: [MessageSchema], default: [] })
   messages: Message[];
 
+  // Written by the tutor: the learning scenario and where it began.
+  @Prop({ type: String, default: null })
+  scenario: string | null;
+
   @Prop({ default: Date.now, type: Date })
   created_at: Date;
 }

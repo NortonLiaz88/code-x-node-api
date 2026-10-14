@@ -18,6 +18,8 @@ import {
   ChatReplyDto,
   ChatStreamEvent,
   MAX_QUICK_REPLIES,
+  TutorScenario,
+  asScenario,
 } from 'src/main/dto/chat/chat-reply/chat-reply.dto';
 import { ChatPostgresRepository } from 'src/infra/postgresql/chat.repository';
 import {
@@ -66,6 +68,7 @@ export class ChatService {
     referenceId: string,
     message: string,
     clientMessageId?: string,
+    scenario?: TutorScenario,
   ): Promise<ChatReplyDto> {
     const chat = await this.getOwnChat(profileId, referenceId);
     const claim = await this.claim(chat, clientMessageId);
@@ -78,6 +81,7 @@ export class ChatService {
         profileId,
         referenceId,
         message,
+        scenario,
       );
     } catch (err) {
       await this.release(claim.reservationId);
@@ -111,6 +115,7 @@ export class ChatService {
     message: string,
     signal?: AbortSignal,
     clientMessageId?: string,
+    scenario?: TutorScenario,
   ): Promise<AsyncGenerator<ChatStreamEvent>> {
     const chat = await this.getOwnChat(profileId, referenceId);
     const claim = await this.claim(chat, clientMessageId);
@@ -125,6 +130,7 @@ export class ChatService {
       referenceId,
       message,
       signal,
+      scenario,
     );
     const finish = (reply: ChatReplyDto) =>
       this.finish(chat, claim.reservationId, reply);
@@ -191,8 +197,18 @@ export class ChatService {
         answer: result.existing.answer,
         quickReplies: result.existing.quickReplies,
         topic: result.existing.topic ?? '',
+        scenario: await this.sessionScenario(chat.referenceId),
       },
     };
+  }
+
+  // The stored reply has no scenario; the tutor's session still does.
+  private async sessionScenario(referenceId: string) {
+    const session = await this.sessionModel
+      .findOne({ id: referenceId }, { scenario: 1 })
+      .lean()
+      .exec();
+    return asScenario(session?.scenario);
   }
 
   private async finish(
@@ -223,9 +239,21 @@ export class ChatService {
 
   async getConversations(profileId: number): Promise<ChatConversationDto[]> {
     const chats = await this.chatRepository.getConversations(profileId);
+    // The tutor keeps each conversation's scenario on its session.
+    const sessions = chats.length
+      ? await this.sessionModel
+          .find(
+            { id: { $in: chats.map((chat) => chat.referenceId) } },
+            { id: 1, scenario: 1 },
+          )
+          .lean()
+          .exec()
+      : [];
+    const scenarios = new Map(sessions.map((s) => [s.id, s.scenario]));
     return chats.map((chat) => ({
       referenceId: chat.referenceId,
       topic: chat.topic ?? '',
+      scenario: asScenario(scenarios.get(chat.referenceId)),
       createdAt: chat.createdAt,
       lastMessageAt: chat.lastMessageAt,
     }));

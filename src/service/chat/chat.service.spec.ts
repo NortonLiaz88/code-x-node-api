@@ -16,6 +16,11 @@ const makeService = (sessionDoc: unknown = null) => {
     findOne: jest.fn().mockReturnValue({
       lean: () => ({ exec: () => Promise.resolve(sessionDoc) }),
     }),
+    find: jest.fn().mockReturnValue({
+      lean: () => ({
+        exec: () => Promise.resolve([{ id: chat.referenceId, scenario: null }]),
+      }),
+    }),
   };
   const httpSendMessage = {
     streamMessage: jest.fn(async function* (): AsyncGenerator<{
@@ -35,6 +40,7 @@ const makeService = (sessionDoc: unknown = null) => {
         answer: 'Um laço repete.',
         quickReplies: ['Ver exemplo'],
         topic: 'Laços',
+        scenario: '',
       },
       meta: { provider: 'ollama', model: 'qwen2.5:7b' },
     }),
@@ -92,7 +98,13 @@ describe('ChatService', () => {
   it('sends to the tutor and records the message with its topic', async () => {
     const { service, httpSendMessage, chatRepository } = makeService();
 
-    const reply = await service.sendMessage(1, chat.referenceId, 'Oi');
+    const reply = await service.sendMessage(
+      1,
+      chat.referenceId,
+      'Oi',
+      undefined,
+      'concept',
+    );
 
     expect(chatRepository.getChatByReference).toHaveBeenCalledWith(
       1,
@@ -102,6 +114,7 @@ describe('ChatService', () => {
       1,
       chat.referenceId,
       'Oi',
+      'concept',
     );
     expect(chatRepository.recordMessage).toHaveBeenCalledWith(chat, 'Laços');
     expect(reply.topic).toBe('Laços');
@@ -124,10 +137,29 @@ describe('ChatService', () => {
       {
         referenceId: chat.referenceId,
         topic: '',
+        scenario: '',
         createdAt: chat.createdAt,
         lastMessageAt: chat.lastMessageAt,
       },
     ]);
+  });
+
+  it("lists each conversation with the tutor's scenario", async () => {
+    const { service, sessionModel } = makeService();
+    sessionModel.find.mockReturnValue({
+      lean: () => ({
+        exec: () =>
+          Promise.resolve([{ id: chat.referenceId, scenario: 'fix_error' }]),
+      }),
+    });
+
+    const [conversation] = await service.getConversations(1);
+
+    expect(conversation.scenario).toBe('fix_error');
+    expect(sessionModel.find).toHaveBeenCalledWith(
+      { id: { $in: [chat.referenceId] } },
+      { id: 1, scenario: 1 },
+    );
   });
 
   it('returns the student and tutor messages, without system ones', async () => {
@@ -370,6 +402,7 @@ describe('ChatService', () => {
             answer: 'Um laço.',
             quickReplies: ['Ver exemplo'],
             topic: 'Laços',
+            scenario: '',
           },
         },
       ]);

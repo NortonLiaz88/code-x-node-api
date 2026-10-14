@@ -3,11 +3,32 @@ import { TutorFailure } from 'src/data/protocols/db/chat/db-send-message-reposit
 
 export const MAX_QUICK_REPLIES = 3;
 
+/**
+ * The learning scenarios the tutor is built around (code-x-ai
+ * src/infra/llm/scenarios.py). The app sends the student's pick; without
+ * one the tutor reads it from the message.
+ */
+export const TUTOR_SCENARIOS = [
+  'concept',
+  'read_code',
+  'fix_error',
+  'plan',
+  'practice',
+  'general',
+] as const;
+export type TutorScenario = (typeof TUTOR_SCENARIOS)[number];
+
+export const asScenario = (value: unknown): TutorScenario | '' =>
+  TUTOR_SCENARIOS.includes(value as TutorScenario)
+    ? (value as TutorScenario)
+    : '';
+
 /** Reply as the tutor service (code-x-ai) sends it. */
 export interface TutorReply {
   answer?: string;
   tooltip?: string[] | null;
   topic?: string | null;
+  scenario?: string | null;
   provider?: string | null;
   model?: string | null;
 }
@@ -50,6 +71,14 @@ export class ChatReplyDto {
   })
   topic: string;
 
+  @ApiProperty({
+    enum: [...TUTOR_SCENARIOS, ''],
+    description:
+      'The learning scenario the tutor answered in, empty when unknown (for example a repeated clientMessageId)',
+    example: 'fix_error',
+  })
+  scenario: TutorScenario | '';
+
   static fromTutor(reply: TutorReply | undefined): ChatReplyDto {
     const quickReplies = (reply?.tooltip ?? [])
       .filter((item) => typeof item === 'string')
@@ -61,6 +90,7 @@ export class ChatReplyDto {
       answer: reply?.answer ?? '',
       quickReplies,
       topic: reply?.topic?.trim() ?? '',
+      scenario: asScenario(reply?.scenario),
     };
   }
 }
