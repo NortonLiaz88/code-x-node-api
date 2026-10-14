@@ -47,6 +47,7 @@ export class SendMessageStreamController {
         body.message,
         abort.signal,
         body.clientMessageId,
+        body.scenario,
       );
     } catch (err) {
       if (err instanceof HttpException) {

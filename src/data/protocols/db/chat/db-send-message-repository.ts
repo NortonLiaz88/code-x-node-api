@@ -1,16 +1,21 @@
-import { TutorReply } from 'src/main/dto/chat/chat-reply/chat-reply.dto';
+import {
+  TutorReply,
+  TutorScenario,
+} from 'src/main/dto/chat/chat-reply/chat-reply.dto';
 
 export class SendMessageRepository {
   sendMessage: (
     profileId: number,
     referenceId: string,
     message: string,
+    scenario?: TutorScenario,
   ) => Promise<TutorReply>;
 
   streamMessage: (
     referenceId: string,
     message: string,
     signal?: AbortSignal,
+    scenario?: TutorScenario,
   ) => AsyncGenerator<TutorStreamEvent>;
 }
 

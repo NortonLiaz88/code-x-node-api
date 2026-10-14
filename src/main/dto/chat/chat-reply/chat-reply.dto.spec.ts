@@ -7,11 +7,13 @@ describe('ChatReplyDto.fromTutor', () => {
         answer: 'Um laço repete um bloco.',
         tooltip: ['Ver exemplo', 'Explicar de novo'],
         topic: ' Laços ',
+        scenario: 'concept',
       }),
     ).toEqual({
       answer: 'Um laço repete um bloco.',
       quickReplies: ['Ver exemplo', 'Explicar de novo'],
       topic: 'Laços',
+      scenario: 'concept',
     });
   });
 
@@ -29,11 +31,19 @@ describe('ChatReplyDto.fromTutor', () => {
       answer: 'x',
       quickReplies: [],
       topic: '',
+      scenario: '',
     });
     expect(ChatReplyDto.fromTutor(undefined)).toEqual({
       answer: '',
       quickReplies: [],
       topic: '',
+      scenario: '',
     });
+  });
+
+  it('drops a scenario the API does not know', () => {
+    expect(
+      ChatReplyDto.fromTutor({ answer: 'x', scenario: 'debate' }).scenario,
+    ).toBe('');
   });
 });

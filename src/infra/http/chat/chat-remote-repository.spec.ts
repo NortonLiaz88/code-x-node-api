@@ -49,6 +49,27 @@ describe('ChatRemoteRepository', () => {
     return items;
   };
 
+  it('sends the picked scenario to the tutor', async () => {
+    const bodies: unknown[] = [];
+    handler = (req, res) => {
+      let raw = '';
+      req.on('data', (chunk) => (raw += chunk));
+      req.on('end', () => {
+        bodies.push(JSON.parse(raw));
+        res.setHeader('Content-Type', 'application/json');
+        res.end(JSON.stringify({ messages: [{ answer: 'ok' }] }));
+      });
+    };
+
+    await repo().sendMessage(1, 'ref', 'deu erro', 'fix_error');
+    await repo().sendMessage(1, 'ref', 'oi');
+
+    expect(bodies).toEqual([
+      { session_id: 'ref', message: 'deu erro', scenario: 'fix_error' },
+      { session_id: 'ref', message: 'oi' },
+    ]);
+  });
+
   // A port nothing listens on.
   const closedPort = async () => {
     const probe = createServer();
