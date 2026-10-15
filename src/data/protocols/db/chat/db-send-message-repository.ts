@@ -1,6 +1,6 @@
 import {
+  TutorPick,
   TutorReply,
-  TutorScenario,
 } from 'src/main/dto/chat/chat-reply/chat-reply.dto';
 
 export class SendMessageRepository {
@@ -8,14 +8,14 @@ export class SendMessageRepository {
     profileId: number,
     referenceId: string,
     message: string,
-    scenario?: TutorScenario,
+    pick?: TutorPick,
   ) => Promise<TutorReply>;
 
   streamMessage: (
     referenceId: string,
     message: string,
     signal?: AbortSignal,
-    scenario?: TutorScenario,
+    pick?: TutorPick,
   ) => AsyncGenerator<TutorStreamEvent>;
 }
 

@@ -49,7 +49,7 @@ describe('ChatRemoteRepository', () => {
     return items;
   };
 
-  it('sends the picked scenario to the tutor', async () => {
+  it('sends the picked scenario and subject to the tutor', async () => {
     const bodies: unknown[] = [];
     handler = (req, res) => {
       let raw = '';
@@ -61,11 +61,19 @@ describe('ChatRemoteRepository', () => {
       });
     };
 
-    await repo().sendMessage(1, 'ref', 'deu erro', 'fix_error');
+    await repo().sendMessage(1, 'ref', 'deu erro', {
+      scenario: 'fix_error',
+      subject: 'algorithms',
+    });
     await repo().sendMessage(1, 'ref', 'oi');
 
     expect(bodies).toEqual([
-      { session_id: 'ref', message: 'deu erro', scenario: 'fix_error' },
+      {
+        session_id: 'ref',
+        message: 'deu erro',
+        scenario: 'fix_error',
+        subject: 'algorithms',
+      },
       { session_id: 'ref', message: 'oi' },
     ]);
   });

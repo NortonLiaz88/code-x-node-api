@@ -41,6 +41,8 @@ const makeService = (sessionDoc: unknown = null) => {
         quickReplies: ['Ver exemplo'],
         topic: 'Laços',
         scenario: '',
+        subject: '',
+        suggestedSubject: '',
       },
       meta: { provider: 'ollama', model: 'qwen2.5:7b' },
     }),
@@ -103,7 +105,7 @@ describe('ChatService', () => {
       chat.referenceId,
       'Oi',
       undefined,
-      'concept',
+      { scenario: 'concept', subject: 'recursion_dp' },
     );
 
     expect(chatRepository.getChatByReference).toHaveBeenCalledWith(
@@ -114,7 +116,7 @@ describe('ChatService', () => {
       1,
       chat.referenceId,
       'Oi',
-      'concept',
+      { scenario: 'concept', subject: 'recursion_dp' },
     );
     expect(chatRepository.recordMessage).toHaveBeenCalledWith(chat, 'Laços');
     expect(reply.topic).toBe('Laços');
@@ -138,27 +140,35 @@ describe('ChatService', () => {
         referenceId: chat.referenceId,
         topic: '',
         scenario: '',
+        subject: '',
         createdAt: chat.createdAt,
         lastMessageAt: chat.lastMessageAt,
       },
     ]);
   });
 
-  it("lists each conversation with the tutor's scenario", async () => {
+  it("lists each conversation with the tutor's scenario and subject", async () => {
     const { service, sessionModel } = makeService();
     sessionModel.find.mockReturnValue({
       lean: () => ({
         exec: () =>
-          Promise.resolve([{ id: chat.referenceId, scenario: 'fix_error' }]),
+          Promise.resolve([
+            {
+              id: chat.referenceId,
+              scenario: 'fix_error',
+              subject: 'algorithms',
+            },
+          ]),
       }),
     });
 
     const [conversation] = await service.getConversations(1);
 
     expect(conversation.scenario).toBe('fix_error');
+    expect(conversation.subject).toBe('algorithms');
     expect(sessionModel.find).toHaveBeenCalledWith(
       { id: { $in: [chat.referenceId] } },
-      { id: 1, scenario: 1 },
+      { id: 1, scenario: 1, subject: 1 },
     );
   });
 
@@ -348,6 +358,32 @@ describe('ChatService', () => {
       expect(second).toEqual(first);
     });
 
+    it("takes a repeat's scenario and subject from the tutor's session", async () => {
+      const { service, sessionModel } = makeService({
+        id: chat.referenceId,
+        scenario: 'plan',
+        subject: 'algorithms',
+      });
+
+      await service.sendMessage(1, chat.referenceId, 'Oi', clientMessageId);
+      const again = await service.sendMessage(
+        1,
+        chat.referenceId,
+        'Oi',
+        clientMessageId,
+      );
+
+      expect(again).toMatchObject({
+        scenario: 'plan',
+        subject: 'algorithms',
+        suggestedSubject: '',
+      });
+      expect(sessionModel.findOne).toHaveBeenCalledWith(
+        { id: chat.referenceId },
+        { scenario: 1, subject: 1 },
+      );
+    });
+
     it('answers a repeat that arrives while the first is pending with 409', async () => {
       const { service, chatRepository } = makeService();
       await chatRepository.reserveReply(chat.id, clientMessageId);
@@ -403,6 +439,8 @@ describe('ChatService', () => {
             quickReplies: ['Ver exemplo'],
             topic: 'Laços',
             scenario: '',
+            subject: '',
+            suggestedSubject: '',
           },
         },
       ]);
