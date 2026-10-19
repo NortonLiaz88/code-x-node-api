@@ -18,6 +18,9 @@ import {
   ChatReplyDto,
   ChatStreamEvent,
   MAX_QUICK_REPLIES,
+  TutorPick,
+  asScenario,
+  asSubject,
 } from 'src/main/dto/chat/chat-reply/chat-reply.dto';
 import { ChatPostgresRepository } from 'src/infra/postgresql/chat.repository';
 import {
@@ -66,6 +69,7 @@ export class ChatService {
     referenceId: string,
     message: string,
     clientMessageId?: string,
+    pick: TutorPick = {},
   ): Promise<ChatReplyDto> {
     const chat = await this.getOwnChat(profileId, referenceId);
     const claim = await this.claim(chat, clientMessageId);
@@ -78,6 +82,7 @@ export class ChatService {
         profileId,
         referenceId,
         message,
+        pick,
       );
     } catch (err) {
       await this.release(claim.reservationId);
@@ -111,6 +116,7 @@ export class ChatService {
     message: string,
     signal?: AbortSignal,
     clientMessageId?: string,
+    pick: TutorPick = {},
   ): Promise<AsyncGenerator<ChatStreamEvent>> {
     const chat = await this.getOwnChat(profileId, referenceId);
     const claim = await this.claim(chat, clientMessageId);
@@ -125,6 +131,7 @@ export class ChatService {
       referenceId,
       message,
       signal,
+      pick,
     );
     const finish = (reply: ChatReplyDto) =>
       this.finish(chat, claim.reservationId, reply);
@@ -191,7 +198,21 @@ export class ChatService {
         answer: result.existing.answer,
         quickReplies: result.existing.quickReplies,
         topic: result.existing.topic ?? '',
+        ...(await this.sessionPick(chat.referenceId)),
+        suggestedSubject: '',
       },
+    };
+  }
+
+  // The stored reply has no scenario or subject; the tutor's session does.
+  private async sessionPick(referenceId: string) {
+    const session = await this.sessionModel
+      .findOne({ id: referenceId }, { scenario: 1, subject: 1 })
+      .lean()
+      .exec();
+    return {
+      scenario: asScenario(session?.scenario),
+      subject: asSubject(session?.subject),
     };
   }
 
@@ -223,9 +244,22 @@ export class ChatService {
 
   async getConversations(profileId: number): Promise<ChatConversationDto[]> {
     const chats = await this.chatRepository.getConversations(profileId);
+    // The tutor keeps each conversation's scenario and subject on its session.
+    const sessions = chats.length
+      ? await this.sessionModel
+          .find(
+            { id: { $in: chats.map((chat) => chat.referenceId) } },
+            { id: 1, scenario: 1, subject: 1 },
+          )
+          .lean()
+          .exec()
+      : [];
+    const byId = new Map(sessions.map((s) => [s.id, s]));
     return chats.map((chat) => ({
       referenceId: chat.referenceId,
       topic: chat.topic ?? '',
+      scenario: asScenario(byId.get(chat.referenceId)?.scenario),
+      subject: asSubject(byId.get(chat.referenceId)?.subject),
       createdAt: chat.createdAt,
       lastMessageAt: chat.lastMessageAt,
     }));

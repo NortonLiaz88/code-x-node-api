@@ -13,22 +13,32 @@ describe('RemoteSendMessage', () => {
         answer: 'Use for.',
         tooltip: ['Ver exemplo'],
         topic: 'Laços',
+        scenario: 'concept',
+        subject: 'data_structures',
+        suggested_subject: 'algorithms',
       }),
     };
     const usecase = new RemoteSendMessage(remote);
 
-    const reply = await usecase.sendMessage(1, 'ref', 'O que é um laço?');
+    const reply = await usecase.sendMessage(1, 'ref', 'O que é um laço?', {
+      scenario: 'concept',
+      subject: 'data_structures',
+    });
 
     expect(remote.sendMessage).toHaveBeenCalledWith(
       1,
       'ref',
       'O que é um laço?',
+      { scenario: 'concept', subject: 'data_structures' },
     );
     expect(reply).toEqual({
       reply: {
         answer: 'Use for.',
         quickReplies: ['Ver exemplo'],
         topic: 'Laços',
+        scenario: 'concept',
+        subject: 'data_structures',
+        suggestedSubject: 'algorithms',
       },
       meta: { provider: null, model: null },
     });
@@ -127,6 +137,9 @@ describe('RemoteSendMessage.streamMessage', () => {
           answer: 'Uma pilha.',
           quickReplies: ['a', 'b', 'c'],
           topic: 'Pilhas',
+          scenario: '',
+          subject: '',
+          suggestedSubject: '',
         },
         meta: { provider: 'ollama', model: 'qwen2.5:7b' },
       },

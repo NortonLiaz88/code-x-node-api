@@ -1,5 +1,11 @@
 import { ApiProperty } from '@nestjs/swagger';
 import { IsUUID } from 'class-validator';
+import {
+  TUTOR_SCENARIOS,
+  TUTOR_SUBJECTS,
+  TutorScenario,
+  TutorSubject,
+} from 'src/main/dto/chat/chat-reply/chat-reply.dto';
 
 export class ChatReferenceParam {
   @IsUUID()
@@ -16,6 +22,19 @@ export class ChatConversationDto {
     example: 'Laços',
   })
   topic: string;
+
+  @ApiProperty({
+    enum: [...TUTOR_SCENARIOS, ''],
+    description:
+      'The learning scenario of the conversation, empty when unknown',
+  })
+  scenario: TutorScenario | '';
+
+  @ApiProperty({
+    enum: [...TUTOR_SUBJECTS, ''],
+    description: 'The subject agent of the conversation, empty when unknown',
+  })
+  subject: TutorSubject | '';
 
   @ApiProperty()
   createdAt: Date;

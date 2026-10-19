@@ -1,6 +1,7 @@
 import {
   ChatReplyDto,
   TutorMeta,
+  TutorPick,
 } from 'src/main/dto/chat/chat-reply/chat-reply.dto';
 
 export interface TutorAnswer {
@@ -13,5 +14,6 @@ export interface SendMessage {
     profileId: number,
     chatId: string,
     message: string,
+    pick?: TutorPick,
   ): Promise<TutorAnswer>;
 }

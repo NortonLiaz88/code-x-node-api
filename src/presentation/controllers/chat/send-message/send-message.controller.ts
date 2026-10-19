@@ -37,6 +37,7 @@ export class SendMessageController {
       body.referenceId,
       body.message,
       body.clientMessageId,
+      { scenario: body.scenario, subject: body.subject },
     );
   }
 }
