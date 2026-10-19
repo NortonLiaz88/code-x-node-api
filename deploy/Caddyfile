@@ -1,0 +1,11 @@
+# HTTPS for the API. Caddy gets and renews the certificate for API_DOMAIN
+# once its DNS points at this server and ports 80 and 443 are open.
+{
+	email {$ACME_EMAIL}
+}
+
+{$API_DOMAIN} {
+	encode zstd gzip
+	# Chat answers stream as server-sent events; Caddy flushes them as they come.
+	reverse_proxy api:8000
+}
