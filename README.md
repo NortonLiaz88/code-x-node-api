@@ -88,6 +88,12 @@ In compose the emails go to Mailpit; read them at http://localhost:8025. Without
 
 A request with invalid fields gets a 400 whose `fields` list names each one, as `{field, message}` with a message in Portuguese where there is one. `message` keeps Nest's usual list. `PATCH /profile/me {username?, email?, phoneNumber?}` changes the account; a value someone else already has gets a 409 with the same `fields` list.
 
+### Health, rate limits and logs
+
+`GET /health` (no login) checks PostgreSQL, both MongoDB connections and the tutor. It answers `200` with `status: ok`, or `status: degraded` when only the tutor is down, and `503` with `status: down` when a database is down, so an uptime monitor can watch it.
+
+Each client IP gets 300 requests a minute. Login, sign-up and password reset get 10, and questions to the tutor get 20. Past the limit the API answers `429` with a message ready to show. Each request is logged in one line (method, path without the query, status, time, user id), never with bodies or headers. Successful health checks aren't logged.
+
 ## Environment variables
 
 Copy `.env.example` to `.env`. Inside compose, the database, Mongo, MinIO and tutor addresses are overridden with the service names, so only the secrets need filling in.
@@ -112,6 +118,9 @@ Copy `.env.example` to `.env`. Inside compose, the database, Mongo, MinIO and tu
 | `RESET_TOKEN_TTL_MINUTES` | Optional minutes a reset link works (default 30) |
 | `LLM_PROVIDER`, `LLM_MODEL` | Compose only: the tutor's model provider and model (default `ollama`, `qwen2.5:7b`) |
 | `TUTOR_PATH` | Optional, compose only: path to the code-x-ai checkout (default `../code-x-ai`) |
+| `TRUST_PROXY` | Optional: number of reverse proxies in front of the API (`1` behind Caddy), so rate limits see the client's IP. Leave unset when nothing is in front |
+| `CORS_ORIGINS` | Optional comma-separated browser origins allowed to call the API; the app doesn't need it |
+| `PRISMA_LOG_QUERIES` | Optional: `true` logs every SQL query (noisy, for debugging) |
 
 ## Develop without Docker for the API
 
