@@ -94,6 +94,32 @@ A request with invalid fields gets a 400 whose `fields` list names each one, as 
 
 Each client IP gets 300 requests a minute. Login, sign-up and password reset get 10, and questions to the tutor get 20. Past the limit the API answers `429` with a message ready to show. Each request is logged in one line (method, path without the query, status, time, user id), never with bodies or headers. Successful health checks aren't logged.
 
+## Deploy to a VPS
+
+`docker-compose.prod.yml` runs everything on one server: Caddy for HTTPS in front of the API, plus Postgres, MongoDB, MinIO and the tutor on a hosted model (no Ollama, no GPU). Only Caddy publishes ports (80 and 443). Migrations run each time the API starts.
+
+**First deploy**
+
+1. Create the server: Hetzner CX23 (2 vCPU, 4 GB), Ubuntu 24.04, with your SSH key. Install Docker (`curl -fsSL https://get.docker.com | sh`) and open only SSH, 80 and 443 (`ufw allow OpenSSH && ufw allow 80,443/tcp && ufw allow 443/udp && ufw enable`).
+2. Point the domain: add an `A` record for the API domain (for example `api.codex.app`) with the server's IPv4 address.
+3. Clone both repos side by side on the server:
+   `git clone https://github.com/NortonLiaz88/code-x-node-api && git clone https://github.com/NortonLiaz88/code-x-ai`
+4. Write the secrets. They live only in the server's `.env` files, never in git.
+   - `code-x-node-api/.env`: copy `.env.example`, then set `API_DOMAIN`, `ACME_EMAIL` (for certificate notices), `POSTGRES_PASSWORD`, `JWT_SECRET_KEY` and `JWT_REFRESH_SECRET_KEY` (each `openssl rand -hex 32`), `MINIO_ACCESS_KEY`, `MINIO_SECRET_KEY`, `SMTP_URL`, `MAIL_FROM`. Database and service addresses come from the compose file.
+   - `code-x-ai/.env`: `LLM_PROVIDER`, `LLM_MODEL` and `API_KEY` for the hosted model.
+5. Start it from `code-x-node-api`: `docker compose -f docker-compose.prod.yml up -d --build`. Caddy gets the certificate on the first request.
+6. Check `https://<API domain>/health`. It should answer `{"status":"ok"}`. Build the app's release with `API_URL=https://<API domain>`, sign up and ask the tutor a question.
+7. Make yourself an admin after signing up: `docker compose -f docker-compose.prod.yml exec api yarn admin:grant you@example.com`.
+
+**Update**
+
+```bash
+cd code-x-ai && git pull && cd ../code-x-node-api && git pull
+docker compose -f docker-compose.prod.yml up -d --build
+```
+
+Logs: `docker compose -f docker-compose.prod.yml logs -f api tutor`. Each container keeps at most 50 MB of logs.
+
 ## Environment variables
 
 Copy `.env.example` to `.env`. Inside compose, the database, Mongo, MinIO and tutor addresses are overridden with the service names, so only the secrets need filling in.

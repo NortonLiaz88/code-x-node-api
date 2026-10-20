@@ -1,0 +1,123 @@
+# Production stack for one VPS: Caddy (HTTPS) in front of this API, with
+# Postgres, MongoDB, MinIO and the tutor (code-x-ai) on a hosted model.
+# Only Caddy publishes ports (80 and 443); everything else stays on the
+# compose network. Setup and updates: README, "Deploy to a VPS".
+#   docker compose -f docker-compose.prod.yml up -d --build
+name: codex-prod
+
+x-logging: &logging
+  driver: json-file
+  options:
+    max-size: 10m
+    max-file: '5'
+
+services:
+  caddy:
+    image: caddy:2.10
+    restart: unless-stopped
+    environment:
+      API_DOMAIN: ${API_DOMAIN:?set API_DOMAIN in .env}
+      ACME_EMAIL: ${ACME_EMAIL:?set ACME_EMAIL in .env}
+    ports:
+      - '80:80'
+      - '443:443'
+      - '443:443/udp'
+    volumes:
+      - ./deploy/Caddyfile:/etc/caddy/Caddyfile:ro
+      - caddy-data:/data
+      - caddy-config:/config
+    depends_on:
+      - api
+    logging: *logging
+
+  postgres:
+    image: postgres:16
+    restart: unless-stopped
+    environment:
+      POSTGRES_USER: codex
+      POSTGRES_PASSWORD: ${POSTGRES_PASSWORD:?set POSTGRES_PASSWORD in .env}
+      POSTGRES_DB: codex
+    volumes:
+      - postgres-data:/var/lib/postgresql/data
+    healthcheck:
+      test: ['CMD-SHELL', 'pg_isready -U codex']
+      interval: 5s
+      retries: 10
+    logging: *logging
+
+  mongo:
+    image: mongo:7
+    restart: unless-stopped
+    volumes:
+      - mongo-data:/data/db
+    healthcheck:
+      test: ['CMD', 'mongosh', '--quiet', '--eval', 'db.adminCommand("ping")']
+      interval: 5s
+      retries: 10
+    logging: *logging
+
+  minio:
+    image: bitnamilegacy/minio:2025.7.23-debian-12-r5
+    restart: unless-stopped
+    environment:
+      MINIO_ROOT_USER: ${MINIO_ACCESS_KEY:?set MINIO_ACCESS_KEY in .env}
+      MINIO_ROOT_PASSWORD: ${MINIO_SECRET_KEY:?set MINIO_SECRET_KEY in .env}
+      MINIO_DEFAULT_BUCKETS: ${MINIO_BUCKET:-codex}
+    volumes:
+      - minio-data:/bitnami/minio/data
+    healthcheck:
+      test: ['CMD', 'curl', '-f', 'http://localhost:9000/minio/health/live']
+      interval: 5s
+      retries: 10
+    logging: *logging
+
+  api:
+    build:
+      context: .
+      target: production
+    restart: unless-stopped
+    env_file: .env
+    # Service hostnames inside the compose network override .env.
+    environment:
+      PORT: '8000'
+      DATABASE_URL: postgresql://codex:${POSTGRES_PASSWORD}@postgres:5432/codex?schema=public
+      MONGO_URL: mongodb://mongo:27017
+      MINIO_ENDPOINT: minio
+      MINIO_PORT: '9000'
+      MINIO_USE_SSL: 'false'
+      TUTOR_URL: http://tutor:80
+      # Caddy is the one proxy in front, so rate limits see the client's IP.
+      TRUST_PROXY: '1'
+    # Migrations run on every start; they are a no-op when nothing changed.
+    command: sh -c "npx prisma migrate deploy && node dist/main"
+    depends_on:
+      postgres:
+        condition: service_healthy
+      mongo:
+        condition: service_healthy
+      minio:
+        condition: service_healthy
+      tutor:
+        condition: service_started
+    logging: *logging
+
+  # The tutor reads its provider, model and API key from its own .env
+  # (LLM_PROVIDER, LLM_MODEL, API_KEY); production uses a hosted model.
+  tutor:
+    build:
+      context: ${TUTOR_PATH:-../code-x-ai}
+    restart: unless-stopped
+    env_file: ${TUTOR_PATH:-../code-x-ai}/.env
+    environment:
+      MONGO_URL: mongodb://mongo:27017
+    depends_on:
+      mongo:
+        condition: service_healthy
+    logging: *logging
+
+volumes:
+  caddy-data:
+  caddy-config:
+  postgres-data:
+  mongo-data:
+  minio-data:
