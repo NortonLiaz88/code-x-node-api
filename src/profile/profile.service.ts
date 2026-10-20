@@ -1,8 +1,13 @@
-import { Injectable, NotFoundException } from '@nestjs/common';
+import {
+  BadRequestException,
+  Injectable,
+  NotFoundException,
+} from '@nestjs/common';
 import { PrismaClientService } from 'src/infra/orm/prisma/prisma-client.service';
 import { UpdateScheduleFormDTO } from './dto/update-schedule.dto';
 import { UpdateAccountDTO } from './dto/update-account.dto';
 import { UpdateProfileDto } from './dto/update-profile.dto';
+import { ChangePasswordDto } from './dto/change-password.dto';
 import { Prisma } from '@prisma/client';
 import {
   FieldErrorDto,
@@ -18,7 +23,14 @@ const ACCOUNT_FIELDS = {
   email: true,
   phoneNumber: true,
   updatedAt: true,
+  userPreference: true,
 } as const;
+
+const PREFERENCE_FIELDS = [
+  'soundEffects',
+  'vibration',
+  'chatAnimation',
+] as const;
 
 @Injectable()
 export class ProfileService {
@@ -66,10 +78,23 @@ export class ProfileService {
     }
     if (taken.length) throw fieldConflict(taken);
 
+    const preferences = Object.fromEntries(
+      PREFERENCE_FIELDS.filter((field) => data[field] !== undefined).map(
+        (field) => [field, data[field]],
+      ),
+    );
+    const update: Prisma.UserUpdateInput = { ...changes };
+    if (Object.keys(preferences).length) {
+      // Older accounts may have no preference row yet.
+      update.userPreference = {
+        upsert: { create: preferences, update: preferences },
+      };
+    }
+
     try {
       const user = await this.prismaService.user.update({
         where: { id: userId },
-        data: changes,
+        data: update,
         select: ACCOUNT_FIELDS,
       });
       return user;
@@ -88,6 +113,31 @@ export class ProfileService {
       }
       throw err;
     }
+  }
+
+  // Needs the current password, so a phone left unlocked can't change it.
+  public async changePassword(userId: number, data: ChangePasswordDto) {
+    const user = await this.prismaService.user.findUnique({
+      where: { id: userId },
+      select: { password: true },
+    });
+    if (!user) throw new NotFoundException('User not found');
+
+    const matches = await bcrypt.compare(data.currentPassword, user.password);
+    if (!matches) {
+      const message = 'A senha atual não confere.';
+      throw new BadRequestException({
+        statusCode: 400,
+        error: 'Bad Request',
+        message: [message],
+        fields: [{ field: 'currentPassword', message }],
+      });
+    }
+
+    await this.prismaService.user.update({
+      where: { id: userId },
+      data: { password: await bcrypt.hash(data.newPassword, 10) },
+    });
   }
 
   public async getUserSchedule(userId: number) {

@@ -1,5 +1,11 @@
 import { ApiPropertyOptional } from '@nestjs/swagger';
-import { IsEmail, IsOptional, Length, Matches } from 'class-validator';
+import {
+  IsBoolean,
+  IsEmail,
+  IsOptional,
+  Length,
+  Matches,
+} from 'class-validator';
 
 // RF-03: the fields a student edits. Leave a field out to keep it.
 export class UpdateProfileDto {
@@ -24,4 +30,23 @@ export class UpdateProfileDto {
     message: 'O celular precisa ter de 8 a 15 dígitos.',
   })
   phoneNumber?: string;
+
+  // The Account accessibility switches.
+  @ApiPropertyOptional({ example: true })
+  @IsOptional()
+  @IsBoolean()
+  soundEffects?: boolean;
+
+  @ApiPropertyOptional({ example: true, description: 'Haptic feedback' })
+  @IsOptional()
+  @IsBoolean()
+  vibration?: boolean;
+
+  @ApiPropertyOptional({
+    example: true,
+    description: 'Animations; off works like Reduce motion',
+  })
+  @IsOptional()
+  @IsBoolean()
+  chatAnimation?: boolean;
 }
