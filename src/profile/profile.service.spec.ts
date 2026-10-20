@@ -1,6 +1,7 @@
 import { ConflictException } from '@nestjs/common';
 import { Prisma } from '@prisma/client';
 import { ProfileService } from './profile.service';
+import * as bcrypt from 'bcrypt';
 
 const makeService = (others: Record<string, string>[] = []) => {
   const user = {
@@ -80,5 +81,59 @@ describe('ProfileService.updateProfile', () => {
     );
 
     expect(body).toMatchObject({ fields: [{ field: 'email' }] });
+  });
+});
+
+describe('ProfileService preferences and password', () => {
+  it('saves the accessibility switches without touching the password', async () => {
+    const { service, user } = makeService();
+
+    await service.updateProfile(1, { vibration: false, chatAnimation: true });
+
+    const { data } = user.update.mock.calls[0][0];
+    expect(data).toEqual({
+      userPreference: {
+        upsert: {
+          create: { vibration: false, chatAnimation: true },
+          update: { vibration: false, chatAnimation: true },
+        },
+      },
+    });
+    expect(data).not.toHaveProperty('password');
+  });
+
+  const withPassword = async (plain: string) => {
+    const hash = await bcrypt.hash(plain, 4);
+    const user = {
+      findUnique: jest.fn(async () => ({ password: hash })),
+      update: jest.fn(async (_args: any) => ({})),
+    };
+    return { service: new ProfileService({ user } as any), user };
+  };
+
+  it('changes the password when the current one matches', async () => {
+    const { service, user } = await withPassword('antiga1');
+
+    await service.changePassword(1, {
+      currentPassword: 'antiga1',
+      newPassword: 'nova123',
+    });
+
+    const { data } = user.update.mock.calls[0][0];
+    expect(await bcrypt.compare('nova123', data.password)).toBe(true);
+  });
+
+  it('names the current password field when it is wrong', async () => {
+    const { service, user } = await withPassword('antiga1');
+
+    await expect(
+      service.changePassword(1, {
+        currentPassword: 'errada1',
+        newPassword: 'nova123',
+      }),
+    ).rejects.toMatchObject({
+      response: { fields: [{ field: 'currentPassword' }] },
+    });
+    expect(user.update).not.toHaveBeenCalled();
   });
 });
